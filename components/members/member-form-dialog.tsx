@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useSWRConfig } from "swr"
-import { ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
+import { ImagePlus, LoaderCircle, Trash2, X } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -35,10 +36,14 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
   const [photo, setPhoto] = useState<File | null>(null)
   const [removePhoto, setRemovePhoto] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false)
   const [pending, setPending] = useState(false)
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setPhotoViewerOpen(false)
+      return
+    }
     setName(member?.name ?? "")
     setStatus(member?.status ?? "active")
     setPhoto(null)
@@ -146,19 +151,18 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
               <FieldLabel>Foto do perfil</FieldLabel>
               <div className="flex items-center gap-4 rounded-xl border border-dashed p-4">
                 {photoPreview ? (
-                  <a
-                    href={photoPreview}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => setPhotoViewerOpen(true)}
                     className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label={name ? `Abrir foto de ${name}` : "Abrir foto do membro"}
-                    title="Abrir foto"
+                    aria-label={name ? `Ver foto de ${name}` : "Ver foto do membro"}
+                    title="Ver foto"
                   >
                     <Avatar className="size-16 cursor-pointer">
                       <AvatarImage src={photoPreview} alt={name ? `Foto de ${name}` : "Prévia da foto do membro"} />
                       <AvatarFallback className="bg-muted text-sm font-medium">{initials || "NS"}</AvatarFallback>
                     </Avatar>
-                  </a>
+                  </button>
                 ) : (
                   <Avatar className="size-16 shrink-0">
                     <AvatarFallback className="bg-muted text-sm font-medium">{initials || "NS"}</AvatarFallback>
@@ -213,6 +217,40 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
             </Button>
           </DialogFooter>
         </form>
+
+        <Dialog open={photoViewerOpen && Boolean(photoPreview)} onOpenChange={setPhotoViewerOpen}>
+          <DialogPortal>
+            <DialogOverlay className="z-[60] bg-black/60" onClick={() => setPhotoViewerOpen(false)} />
+            <DialogPrimitive.Popup
+              data-slot="dialog-content"
+              className="fixed top-1/2 left-1/2 z-[60] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-2 overflow-hidden rounded-xl bg-popover p-2 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-3xl sm:p-3 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+            >
+              <DialogHeader className="sr-only">
+                <DialogTitle>Foto do membro</DialogTitle>
+                <DialogDescription>{name ? `Foto de ${name}` : "Prévia da foto do membro"}</DialogDescription>
+              </DialogHeader>
+              <DialogClose
+                render={
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
+                    className="absolute top-3 right-3 z-10 bg-background/95 text-foreground shadow-md ring-1 ring-foreground/10 hover:bg-background"
+                  />
+                }
+              >
+                <X />
+                <span className="sr-only">Fechar</span>
+              </DialogClose>
+              {photoPreview ? (
+                <img
+                  src={photoPreview}
+                  alt={name ? `Foto de ${name}` : "Prévia da foto do membro"}
+                  className="max-h-[80vh] w-full rounded-lg bg-muted/30 object-contain"
+                />
+              ) : null}
+            </DialogPrimitive.Popup>
+          </DialogPortal>
+        </Dialog>
       </DialogContent>
     </Dialog>
   )
