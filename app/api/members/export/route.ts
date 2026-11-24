@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs"
 import { normalizeText } from "@/lib/members/normalization"
 import { MEMBER_STATUS_EXPORT_LABELS, type MemberStatus } from "@/lib/members/types"
+import { getMemberPhotoImage } from "@/lib/server/member-photos"
 import { getSupabaseAdmin } from "@/lib/server/supabase-admin"
 
 const noStoreHeaders = { "Cache-Control": "no-store" }
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await getSupabaseAdmin()
       .from("members")
-      .select("external_code, name, status, congregation")
+      .select("external_code, name, status, congregation, photo_path")
 
     if (error) {
       return Response.json({ error: "Não foi possível carregar os membros para exportação." }, { status: 503, headers: noStoreHeaders })
@@ -32,6 +33,16 @@ export async function GET(request: Request) {
       .filter((member) => scope === "all" || !search || normalizeText(member.name).includes(search))
       .filter((member) => scope === "all" || status === "all" || member.status === status)
       .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }))
+
+    const photoEntries = await Promise.all(
+      members.map(async (member) => [
+        member.photo_path ?? "",
+        member.photo_path ? await getMemberPhotoImage(member.photo_path) : null,
+      ] as const),
+    )
+    const photosByPath = new Map(
+      photoEntries.filter(([path, image]) => Boolean(path) && Boolean(image)) as Array<[string, { buffer: Buffer; extension: "jpeg" | "png" }]>,
+    )
 
     const workbook = new ExcelJS.Workbook()
     workbook.creator = "Cadastro de Membros"
@@ -56,7 +67,7 @@ export async function GET(request: Request) {
       fgColor: { argb: "FF17283E" },
     }
 
-    for (const member of members) {
+    members.forEach((member, index) => {
       worksheet.addRow({
         photo: "",
         code: member.external_code ?? "",
@@ -64,7 +75,19 @@ export async function GET(request: Request) {
         status: MEMBER_STATUS_EXPORT_LABELS[member.status as MemberStatus] ?? "",
         congregation: member.congregation,
       })
-    }
+
+      const image = member.photo_path ? photosByPath.get(member.photo_path) : null
+      if (!image) return
+
+      const rowNumber = index + 2
+      worksheet.getRow(rowNumber).height = 56
+      const imageId = workbook.addImage({ buffer: image.buffer, extension: image.extension })
+      worksheet.addImage(imageId, {
+        tl: { col: 0, row: rowNumber - 1 },
+        ext: { width: 56, height: 56 },
+        editAs: "oneCell",
+      })
+    })
 
     const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date())
     const file = Buffer.from(await workbook.xlsx.writeBuffer())

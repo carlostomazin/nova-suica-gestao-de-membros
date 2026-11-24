@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import useSWR from "swr"
-import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Plus, Search, UsersRound } from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, LoaderCircle, Plus, Search, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -94,9 +94,14 @@ export function MembersPage() {
             onClick={() => void exportMembers("all")}
             disabled={exporting}
             aria-label="Exportar membros"
+            aria-busy={exporting}
           >
-            <Download data-icon="inline-start" />
-            Exportar
+            {exporting ? (
+              <LoaderCircle data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <Download data-icon="inline-start" />
+            )}
+            {exporting ? "Exportando..." : "Exportar"}
           </Button>
           <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="px-2.5 sm:px-3">
             <Plus data-icon="inline-start" />

@@ -102,3 +102,24 @@ export async function getSignedPhotoUrls(paths: string[]) {
       .map((item) => [item.path as string, item.signedUrl as string]),
   )
 }
+
+export async function getMemberPhotoImage(path: string): Promise<{ buffer: Buffer; extension: "jpeg" | "png" } | null> {
+  const { data, error } = await getSupabaseAdmin().storage.from(bucketName).download(path)
+  if (error || !data) return null
+
+  const sourceBuffer = Buffer.from(await data.arrayBuffer())
+  const ext = path.split(".").pop()?.toLowerCase()
+
+  if (ext === "png") return { buffer: sourceBuffer, extension: "png" }
+  if (ext === "jpg" || ext === "jpeg") return { buffer: sourceBuffer, extension: "jpeg" }
+  if (ext === "webp") {
+    try {
+      const sharp = (await import("sharp")).default
+      return { buffer: await sharp(sourceBuffer).png().toBuffer(), extension: "png" }
+    } catch {
+      return null
+    }
+  }
+
+  return null
+}
