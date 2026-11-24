@@ -145,10 +145,25 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
             <Field>
               <FieldLabel>Foto do perfil</FieldLabel>
               <div className="flex items-center gap-4 rounded-xl border border-dashed p-4">
-                <Avatar className="size-16 shrink-0">
-                  {photoPreview ? <AvatarImage src={photoPreview} alt={name ? `Foto de ${name}` : "Prévia da foto do membro"} /> : null}
-                  <AvatarFallback className="bg-muted text-sm font-medium">{initials || "NS"}</AvatarFallback>
-                </Avatar>
+                {photoPreview ? (
+                  <a
+                    href={photoPreview}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={name ? `Abrir foto de ${name}` : "Abrir foto do membro"}
+                    title="Abrir foto"
+                  >
+                    <Avatar className="size-16 cursor-pointer">
+                      <AvatarImage src={photoPreview} alt={name ? `Foto de ${name}` : "Prévia da foto do membro"} />
+                      <AvatarFallback className="bg-muted text-sm font-medium">{initials || "NS"}</AvatarFallback>
+                    </Avatar>
+                  </a>
+                ) : (
+                  <Avatar className="size-16 shrink-0">
+                    <AvatarFallback className="bg-muted text-sm font-medium">{initials || "NS"}</AvatarFallback>
+                  </Avatar>
+                )}
                 <div className="flex min-w-0 flex-col gap-2">
                   <input
                     ref={photoInputRef}
