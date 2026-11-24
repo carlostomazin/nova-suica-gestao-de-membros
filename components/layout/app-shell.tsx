@@ -17,9 +17,9 @@ const navigationItems = [
   { href: "/members", label: "Membros", icon: UsersRound },
 ]
 
-function Brand({ mobile = false, compact = false }: { mobile?: boolean; compact?: boolean }) {
+function Brand({ mobile = false, compact = false, className }: { mobile?: boolean; compact?: boolean; className?: string }) {
   return (
-    <div className={cn("flex items-center gap-3", compact ? "px-0 py-0" : mobile ? "px-5 py-2" : "px-6 py-7")}>
+    <div className={cn("flex items-center gap-3", compact ? "px-0 py-0" : mobile ? "px-5 py-2" : "px-6 py-7", className)}>
       <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", mobile && !compact ? "bg-primary/10 text-primary" : "bg-white/10 text-white")}>
         <UsersRound aria-hidden="true" />
       </span>
@@ -87,17 +87,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="min-h-screen lg:pl-64">
-          <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6 lg:hidden">
-            <Brand mobile />
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-navy-soft/30 bg-navy px-4 sm:px-6 lg:hidden">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               aria-label="Abrir menu de navegação"
+              className="text-white hover:bg-white/10 hover:text-white"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu aria-hidden="true" />
             </Button>
+            <Brand mobile compact className="min-w-0 px-0 py-0" />
           </header>
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -106,20 +107,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <SheetTitle>Menu de navegação</SheetTitle>
                 <SheetDescription>Escolha uma das páginas do cadastro.</SheetDescription>
               </SheetHeader>
-            <Brand mobile compact />
-              <SheetClose
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Fechar menu"
-                    className="absolute top-5 right-4 text-white hover:bg-white/10 hover:text-white"
-                  />
-                }
-              >
-                <X aria-hidden="true" />
-              </SheetClose>
+              <div className="flex items-center justify-between px-5 py-5">
+                <Brand mobile compact />
+                <SheetClose
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Fechar menu"
+                      className="text-white hover:bg-white/10 hover:text-white"
+                    />
+                  }
+                >
+                  <X aria-hidden="true" />
+                </SheetClose>
+              </div>
               <NavigationLinks pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} />
             </SheetContent>
           </Sheet>

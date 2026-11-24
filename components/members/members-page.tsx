@@ -6,7 +6,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, Download, FileSpreadsheet, Plus
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { MemberRowActions } from "@/components/members/member-row-actions"
@@ -79,14 +79,12 @@ export function MembersPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="px-2 sm:px-0">
-          <p className="text-sm font-medium text-primary">Nova Suíça · Administração</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">Membros</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Gerencie os membros da Igreja Nova Suíça</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Membros</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={openImportMembers} aria-label="Importar membros" className="px-2.5 sm:px-3">
+          <Button type="button" variant="outline" onClick={openImportMembers} aria-label="Importar membros">
             <FileSpreadsheet data-icon="inline-start" />
-            <span className="hidden sm:inline">Importar</span>
+            Importar
           </Button>
           <ExportMenu
             exporting={exporting}
@@ -95,8 +93,7 @@ export function MembersPage() {
           />
           <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="px-2.5 sm:px-3">
             <Plus data-icon="inline-start" />
-            <span className="sm:hidden">Novo</span>
-            <span className="hidden sm:inline">Novo membro</span>
+            Novo
           </Button>
         </div>
       </header>
@@ -111,24 +108,22 @@ export function MembersPage() {
         </Alert>
       ) : null}
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
-        <CardHeader className="border-b py-4">
-          <div className="flex items-center gap-2">
-            <div className="relative min-w-0 flex-1 lg:max-w-md">
-              <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                aria-label="Buscar membro por nome"
-                placeholder="Buscar por nome"
-                value={search}
-                onChange={(event) => { setSearch(event.target.value); setPage(1) }}
-                className="h-10 bg-background pl-10"
-              />
-            </div>
-            <MemberFiltersDialog sortOrder={sortOrder} status={status} onApply={applyFilters} />
-          </div>
-        </CardHeader>
+      <div className="flex items-center gap-2">
+        <div className="relative min-w-0 flex-1 lg:max-w-md">
+          <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            aria-label="Buscar membro por nome"
+            placeholder="Buscar por nome"
+            value={search}
+            onChange={(event) => { setSearch(event.target.value); setPage(1) }}
+            className="h-10 bg-background pl-10"
+          />
+        </div>
+        <MemberFiltersDialog sortOrder={sortOrder} status={status} onApply={applyFilters} />
+      </div>
 
+      <Card className="overflow-hidden border-border/80 shadow-sm">
         <CardContent className="p-0">
           {isLoading && !data ? (
             <div className="flex flex-col gap-4 p-5" aria-label="Carregando membros">
@@ -246,9 +241,9 @@ function ExportMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button type="button" variant="outline" disabled={exporting} aria-label="Exportar membros" className="px-2.5 sm:px-3" />}>
+      <DropdownMenuTrigger render={<Button type="button" variant="outline" disabled={exporting} aria-label="Exportar membros" />}>
         <Download data-icon="inline-start" />
-        <span className="hidden sm:inline">Exportar</span>
+        Exportar
         <ChevronDown data-icon="inline-end" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
