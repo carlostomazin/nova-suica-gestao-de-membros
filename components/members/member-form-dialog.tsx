@@ -305,6 +305,20 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     setCameraStarting(true)
     stopCameraStream()
     try {
+      if (navigator.permissions?.query) {
+        try {
+          const permission = await navigator.permissions.query({ name: "camera" as PermissionName })
+          if (permission.state === "denied") {
+            toast.error(
+              "O acesso à câmera está bloqueado para este site. Clique no ícone de cadeado/configurações ao lado do endereço, permita a câmera e recarregue a página.",
+            )
+            return
+          }
+        } catch {
+          // Alguns navegadores não suportam consultar a permissão de câmera; segue com getUserMedia.
+        }
+      }
+
       await startCameraStream()
       setCameraOpen(true)
     } catch (error) {
@@ -317,7 +331,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
         (error.name === "NotAllowedError" || error.name === "PermissionDeniedError" || error.name === "SecurityError")
       toast.error(
         denied
-          ? "Permissão da câmera negada ou bloqueada. Verifique as permissões do site no navegador e se a página está em HTTPS."
+          ? "O navegador bloqueou o acesso à câmera. Verifique se o site tem permissão para usar a câmera, se a página está em HTTPS e tente novamente."
           : "Não foi possível acessar a webcam.",
       )
     } finally {
