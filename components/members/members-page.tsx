@@ -135,7 +135,7 @@ export function MembersPage() {
         <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
       </div>
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="gap-0 overflow-hidden border-border/80 py-0 shadow-sm">
         <CardContent className="p-0">
           {isLoading && !data ? (
             <div className="flex flex-col gap-4 p-5" aria-label="Carregando membros">
@@ -147,10 +147,10 @@ export function MembersPage() {
                 <Table aria-label="Lista de membros">
                   <TableHeader>
                     <TableRow className="bg-muted/35 hover:bg-muted/35">
-                      <TableHead className="w-20 pl-5">Foto</TableHead>
-                      <TableHead>Nome completo</TableHead>
-                      <TableHead className="w-52">Situação</TableHead>
-                      <TableHead className="w-16 pr-5 text-right"><span className="sr-only">Ações</span></TableHead>
+                      <TableHead className="h-10 w-20 pl-5">Foto</TableHead>
+                      <TableHead className="h-10">Nome completo</TableHead>
+                      <TableHead className="h-10 w-52">Situação</TableHead>
+                      <TableHead className="h-10 w-16 pr-5 text-right"><span className="sr-only">Ações</span></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
