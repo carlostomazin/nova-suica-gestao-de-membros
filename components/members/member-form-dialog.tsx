@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import useSWR, { useSWRConfig } from "swr"
-import { ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
+import { Camera, ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,8 @@ type CongregationsResponse = { congregations: string[] }
 type ApiError = { error?: string }
 
 export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialogProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
   const { mutate } = useSWRConfig()
   const { data: congregationData } = useSWR<CongregationsResponse>("/api/members?congregations=1", jsonFetcher)
   const congregations = [...new Set([...(congregationData?.congregations ?? []), ...(member?.congregation ? [member.congregation] : [])])]
@@ -181,7 +182,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="member-photo">Foto do perfil</FieldLabel>
+              <FieldLabel>Foto do perfil</FieldLabel>
               <div className="flex items-center gap-4 rounded-xl border border-dashed p-4">
                 <Avatar className="size-16 shrink-0">
                   {photoPreview ? <AvatarImage src={photoPreview} alt={name ? `Foto de ${name}` : "Prévia da foto do membro"} /> : null}
@@ -189,18 +190,36 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                 </Avatar>
                 <div className="flex min-w-0 flex-col gap-2">
                   <input
-                    ref={inputRef}
+                    ref={cameraInputRef}
+                    id="member-photo-camera"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    capture="user"
+                    hidden
+                    onChange={(event) => {
+                      handlePhotoSelection(event.target.files?.[0])
+                      event.target.value = ""
+                    }}
+                  />
+                  <input
+                    ref={galleryInputRef}
                     id="member-photo"
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    className="sr-only"
-                    aria-label="Selecionar foto do membro"
-                    onChange={(event) => handlePhotoSelection(event.target.files?.[0])}
+                    hidden
+                    onChange={(event) => {
+                      handlePhotoSelection(event.target.files?.[0])
+                      event.target.value = ""
+                    }}
                   />
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
+                      <Camera data-icon="inline-start" />
+                      Abrir câmera
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => galleryInputRef.current?.click()}>
                       <ImagePlus data-icon="inline-start" />
-                      {photoPreview ? "Trocar foto" : "Adicionar foto"}
+                      Escolher da galeria
                     </Button>
                     {photoPreview ? (
                       <Button
@@ -211,7 +230,8 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                           setPhoto(null)
                           setPhotoPreview(null)
                           setRemovePhoto(Boolean(member?.photoUrl))
-                          if (inputRef.current) inputRef.current.value = ""
+                          if (cameraInputRef.current) cameraInputRef.current.value = ""
+                          if (galleryInputRef.current) galleryInputRef.current.value = ""
                         }}
                       >
                         <Trash2 data-icon="inline-start" />
@@ -219,7 +239,6 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                       </Button>
                     ) : null}
                   </div>
-                  <FieldDescription>JPG, PNG ou WebP · máximo de 5 MB</FieldDescription>
                 </div>
               </div>
             </Field>
