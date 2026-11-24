@@ -107,7 +107,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
-        initialFocus={member ? dialogTitleRef : undefined}
+        initialFocus={dialogTitleRef}
       >
         <DialogHeader>
           <DialogTitle ref={dialogTitleRef} tabIndex={-1}>{member ? "Editar membro" : "Cadastrar membro"}</DialogTitle>
