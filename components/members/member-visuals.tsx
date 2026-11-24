@@ -31,7 +31,7 @@ export function MemberAvatar({
 
 const statusStyles: Record<MemberStatus, string> = {
   active: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  inactive: "border-slate-200 bg-slate-100 text-slate-600",
+  inactive: "border-red-200 bg-red-50 text-red-700",
   not_revalidated: "border-amber-200 bg-amber-50 text-amber-800",
 }
 
@@ -42,7 +42,7 @@ export function MemberStatusBadge({ status }: { status: MemberStatus }) {
         aria-hidden="true"
         className={cn(
           "mr-1.5 size-1.5 rounded-full",
-          status === "active" ? "bg-emerald-600" : status === "inactive" ? "bg-slate-500" : "bg-amber-600",
+          status === "active" ? "bg-emerald-600" : status === "inactive" ? "bg-red-600" : "bg-amber-600",
         )}
       />
       {MEMBER_STATUS_LABELS[status]}

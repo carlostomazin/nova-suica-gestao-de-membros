@@ -1,5 +1,4 @@
 import ExcelJS from "exceljs"
-import { requireAuthenticatedUser } from "@/lib/server/auth"
 import { normalizeText } from "@/lib/members/normalization"
 import { MEMBER_STATUS_EXPORT_LABELS, type MemberStatus } from "@/lib/members/types"
 import { getSupabaseAdmin } from "@/lib/server/supabase-admin"
@@ -8,9 +7,6 @@ const noStoreHeaders = { "Cache-Control": "no-store" }
 const validStatuses = new Set(["all", "active", "inactive", "not_revalidated"])
 
 export async function GET(request: Request) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   try {
     const params = new URL(request.url).searchParams
     const scope = params.get("scope") ?? "all"

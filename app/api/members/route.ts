@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto"
 import { z } from "zod"
-import { requireAuthenticatedUser } from "@/lib/server/auth"
 import { normalizeText } from "@/lib/members/normalization"
 import type { MemberStatus } from "@/lib/members/types"
 import { getSignedPhotoUrls, imagePayloadFromBuffer, imagePayloadFromFile, removeMemberPhotos, uploadMemberPhoto } from "@/lib/server/member-photos"
@@ -20,9 +19,6 @@ function errorResponse(message: string, status = 400) {
 }
 
 export async function GET(request: Request) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   try {
     const searchParams = new URL(request.url).searchParams
     const supabase = getSupabaseAdmin()
@@ -118,9 +114,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   let photoPath: string | null = null
 
   try {

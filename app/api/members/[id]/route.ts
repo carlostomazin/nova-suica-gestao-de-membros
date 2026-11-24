@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { requireAuthenticatedUser } from "@/lib/server/auth"
 import { getSignedPhotoUrls, imagePayloadFromBuffer, imagePayloadFromFile, removeMemberPhotos, uploadMemberPhoto } from "@/lib/server/member-photos"
 import { getSupabaseAdmin } from "@/lib/server/supabase-admin"
 
@@ -21,9 +20,6 @@ async function getMemberId(context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   let uploadedPath: string | null = null
 
   try {
@@ -110,9 +106,6 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   try {
     const memberId = await getMemberId(context)
     if (!memberId.success) return errorResponse("Membro não encontrado.", 404)

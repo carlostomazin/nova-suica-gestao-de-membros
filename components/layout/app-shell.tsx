@@ -2,17 +2,14 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, LogOut, Menu, UsersRound, X } from "lucide-react"
-import { toast } from "sonner"
+import { usePathname } from "next/navigation"
+import { LayoutDashboard, Menu, UsersRound, X } from "lucide-react"
 import { cn } from "cn"
 import { MemberActionsContext } from "@/components/layout/member-actions-context"
 import { ImportMembersDialog } from "@/components/members/import-members-dialog"
 import { MemberFormDialog } from "@/components/members/member-form-dialog"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser"
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import type { Member } from "@/lib/members/types"
 
 const navigationItems = [
@@ -28,7 +25,7 @@ function Brand({ mobile = false, compact = false }: { mobile?: boolean; compact?
       </span>
       <span className="flex min-w-0 flex-col">
         <span className="truncate text-sm font-semibold tracking-wide text-white">NOVA SUÍÇA</span>
-        <span className="mt-0.5 text-xs text-white/55">Cadastro de membros</span>
+        <span className="mt-0.5 text-xs text-white/55">Gestão de membros</span>
       </span>
     </div>
   )
@@ -62,12 +59,10 @@ function NavigationLinks({ pathname, onNavigate }: { pathname: string; onNavigat
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [memberDialogOpen, setMemberDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<Member | null>(null)
-  const [signingOut, setSigningOut] = useState(false)
 
   const actions = useMemo(() => ({
     openCreateMember() {
@@ -83,41 +78,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     },
   }), [])
 
-  if (pathname === "/login" || pathname === "/access-denied") return <>{children}</>
-
-  async function signOut() {
-    setSigningOut(true)
-    try {
-      const { error } = await getSupabaseBrowserClient().auth.signOut()
-      if (error) throw error
-      router.replace("/login")
-      router.refresh()
-    } catch {
-      toast.error("Não foi possível encerrar a sessão. Tente novamente.")
-    } finally {
-      setSigningOut(false)
-    }
-  }
-
   return (
     <MemberActionsContext.Provider value={actions}>
       <div className="min-h-screen bg-muted/45">
         <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy lg:flex">
           <Brand />
           <NavigationLinks pathname={pathname} />
-          <div className="mt-auto flex flex-col gap-4 p-4">
-            <Separator className="bg-white/12" />
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-start text-white/70 hover:bg-white/10 hover:text-white"
-              onClick={signOut}
-              disabled={signingOut}
-            >
-              <LogOut data-icon="inline-start" />
-              {signingOut ? "Saindo…" : "Sair do sistema"}
-            </Button>
-          </div>
         </aside>
 
         <div className="min-h-screen lg:pl-64">
@@ -155,19 +121,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <X aria-hidden="true" />
               </SheetClose>
               <NavigationLinks pathname={pathname} onNavigate={() => setMobileMenuOpen(false)} />
-              <SheetFooter className="mt-auto">
-                <Separator className="bg-white/12" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="justify-start text-white/70 hover:bg-white/10 hover:text-white"
-                  onClick={signOut}
-                  disabled={signingOut}
-                >
-                  <LogOut data-icon="inline-start" />
-                  {signingOut ? "Saindo…" : "Sair do sistema"}
-                </Button>
-              </SheetFooter>
             </SheetContent>
           </Sheet>
 

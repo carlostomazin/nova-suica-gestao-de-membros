@@ -78,10 +78,10 @@ export function MembersPage() {
         <div>
           <p className="text-sm font-medium text-primary">Nova Suíça · Administração</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Membros</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Consulte e mantenha os cadastros da congregação.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Gerencie os membros da Igreja Nova Suíça</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={openImportMembers} className="px-2.5 sm:px-3">
+          <Button type="button" variant="outline" onClick={openImportMembers} aria-label="Importar membros" className="px-2.5 sm:px-3">
             <FileSpreadsheet data-icon="inline-start" />
             <span className="hidden sm:inline">Importar</span>
           </Button>
@@ -90,10 +90,10 @@ export function MembersPage() {
             onExportAll={() => void exportMembers("all")}
             onExportFiltered={() => void exportMembers("filtered")}
           />
-          <Button type="button" onClick={openCreateMember} className="px-2.5 sm:px-3">
+          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="px-2.5 sm:px-3">
             <Plus data-icon="inline-start" />
             <span className="sm:hidden">Novo</span>
-            <span className="hidden sm:inline">Cadastrar membro</span>
+            <span className="hidden sm:inline">Novo membro</span>
           </Button>
         </div>
       </header>
@@ -143,7 +143,7 @@ export function MembersPage() {
                   <TableHeader>
                     <TableRow className="bg-muted/35 hover:bg-muted/35">
                       <TableHead className="w-20 pl-5">Foto</TableHead>
-                      <TableHead>Nome</TableHead>
+                      <TableHead>Nome completo</TableHead>
                       <TableHead className="w-52">
                         <StatusFilter value={status} onChange={changeStatus} />
                       </TableHead>
@@ -250,7 +250,7 @@ function ExportMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button type="button" variant="outline" disabled={exporting} className="px-2.5 sm:px-3" />}>
+      <DropdownMenuTrigger render={<Button type="button" variant="outline" disabled={exporting} aria-label="Exportar membros" className="px-2.5 sm:px-3" />}>
         <Download data-icon="inline-start" />
         <span className="hidden sm:inline">Exportar</span>
         <ChevronDown data-icon="inline-end" />

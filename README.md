@@ -1,6 +1,6 @@
 # Cadastro de Membros — Nova Suíça
 
-Aplicação privada para acompanhar os cadastros de membros da congregação. A interface tem duas páginas principais: **Visão geral** e **Membros**. A autenticação é feita pelo Supabase Auth; os dados e as fotos são acessados somente por rotas do servidor.
+Aplicação administrativa para acompanhar os cadastros de membros da congregação. A interface tem duas páginas principais: **Visão geral** e **Membros**. Conforme o escopo, a aplicação não implementa login, cadastro de usuários nem permissões próprias; a proteção de acesso deve ser aplicada externamente no deployment.
 
 ## Funcionalidades
 
@@ -38,21 +38,21 @@ A aplicação também aceita os aliases de chave pública `NEXT_PUBLIC_SUPABASE_
 
 ## Acesso e segurança
 
-- O cadastro público de contas não é disponibilizado pela aplicação. O usuário precisa entrar com e-mail e senha de uma conta Supabase Auth previamente autorizada pelo responsável do projeto.
-- As rotas protegidas exigem `app_metadata.members_access = true` ou `app_metadata.role = "members_admin"`/`"admin"`. Essa autorização usa `app_metadata` controlado pelo servidor; não use `user_metadata` para conceder acesso.
-- Mantenha desabilitada a criação pública de contas no projeto de autenticação e conceda acesso apenas a pessoas autorizadas.
-- As rotas `/api/members` validam a sessão antes de usar a chave `service_role`. A chave nunca é enviada ao cliente.
-- A tabela e o bucket são privados; o navegador não consulta o banco diretamente. As imagens são servidas com URLs assinadas temporárias.
-- Em produção, confirme que a integração Supabase está disponível nos ambientes Development, Preview e Production do projeto Vercel.
+- A aplicação não possui login, cadastro de usuários ou controle de permissões interno.
+- **Antes de publicar ou conectar dados reais, proteja o deployment por uma camada externa**, como Vercel Deployment Protection com autenticação organizacional, ou um gateway de identidade equivalente. A proteção deve cobrir as páginas e todas as rotas `/api/*`, tanto em Preview quanto em Production.
+- Não compartilhe uma URL de preview desprotegida com dados reais. Para demonstrações públicas, use um projeto Supabase separado com dados fictícios ou anonimizados.
+- As operações de banco e armazenamento são feitas apenas no servidor. `SUPABASE_SERVICE_ROLE_KEY` nunca é enviada ao cliente; essa chave ignora RLS, por isso a barreira externa de acesso é obrigatória.
+- RLS permanece habilitado na tabela `members`, sem permissões para `anon` e `authenticated`; o bucket de fotos é privado e as imagens são entregues por URLs assinadas temporárias.
+- Configure a integração Supabase nos ambientes Development, Preview e Production necessários, mantendo as credenciais exclusivamente nas variáveis do projeto.
 - Cabeçalhos de segurança incluem HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` e uma `Permissions-Policy` restritiva.
 
 ## Configurar e publicar
 
 1. Conecte a integração Supabase ao projeto v0. A migração e o bucket descritos acima já estão aplicados neste projeto.
 2. Garanta que as variáveis da integração estejam configuradas nos ambientes de desenvolvimento, preview e produção. Não copie segredos para o código, para o `.env.example` ou para o repositório.
-3. Cadastre previamente no Supabase Auth as contas que poderão acessar o sistema e conceda `app_metadata.members_access = true` (ou `app_metadata.role = "members_admin"`/`"admin"`). Não use `user_metadata` para esse controle; não há fluxo de cadastro público.
-4. Use **Publicar** no topo do v0 para criar ou atualizar o deployment da Vercel. A sessão e as variáveis da integração devem estar disponíveis também no deployment de produção.
-5. Faça login no endereço publicado e valide busca, cadastro, importação/exportação e upload de fotos antes de compartilhar o endereço com a equipe.
+3. Antes de publicar ou usar dados reais, ative Vercel Deployment Protection com autenticação organizacional para Preview e Production, ou configure um gateway externo equivalente. Confirme que a proteção também intercepta todas as rotas `/api/*`.
+4. Use **Publicar** no topo do v0 somente depois de confirmar a proteção externa. Não exponha o deployment diretamente à internet.
+5. Acesse o deployment pela camada externa e valide busca, cadastro, importação/exportação e upload de fotos antes de compartilhar com a equipe.
 
 ## Desenvolvimento local
 
@@ -63,4 +63,4 @@ pnpm install
 pnpm dev
 ```
 
-O projeto usa Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase Auth/Postgres/Storage, SWR e ExcelJS.
+O projeto usa Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase PostgreSQL/Storage, SWR e ExcelJS.

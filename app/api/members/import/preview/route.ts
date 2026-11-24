@@ -1,13 +1,9 @@
-import { requireAuthenticatedUser } from "@/lib/server/auth"
 import { analyzeMemberWorkbook } from "@/lib/server/import-analysis"
 import { getWorkbookFile } from "@/lib/server/uploaded-workbook"
 
 const noStoreHeaders = { "Cache-Control": "no-store" }
 
 export async function POST(request: Request) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   try {
     const formData = await request.formData()
     const upload = getWorkbookFile(formData.get("file"))

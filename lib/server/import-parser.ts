@@ -62,7 +62,7 @@ function findHeader(worksheet: ExcelJS.Worksheet) {
 function normalizeStatus(rawStatus: string) {
   const normalized = normalizeText(rawStatus).toUpperCase()
 
-  if (!normalized) return { status: "active" as const, needsReview: true }
+  if (!normalized) return { status: "active" as const, needsReview: false }
   if (normalized === "ATIVO") return { status: "active" as const, needsReview: false }
   if (normalized === "INATIVO") return { status: "inactive" as const, needsReview: false }
   if (normalized === "NAO REVALIDADO") {

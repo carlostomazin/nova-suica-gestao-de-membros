@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto"
-import { requireAuthenticatedUser } from "@/lib/server/auth"
 import { normalizeText } from "@/lib/members/normalization"
 import { imagePayloadFromBuffer, removeMemberPhotos, uploadMemberPhoto } from "@/lib/server/member-photos"
 import { parseMemberWorkbook } from "@/lib/server/import-parser"
@@ -13,9 +12,6 @@ function errorResponse(message: string, status = 400) {
 }
 
 export async function POST(request: Request) {
-  const authFailure = await requireAuthenticatedUser()
-  if (authFailure) return authFailure
-
   try {
     const formData = await request.formData()
     const upload = getWorkbookFile(formData.get("file"))

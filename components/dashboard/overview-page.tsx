@@ -6,7 +6,7 @@ import useSWR from "swr"
 import { ArrowRight, Download, FileSpreadsheet, UserPlus, UsersRound, UserRoundCheck, UserRoundX, UserRoundSearch, type LucideIcon } from "lucide-react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -16,14 +16,14 @@ import { jsonFetcher, downloadMemberExport, type MemberStatsResponse } from "@/l
 const statsCards = [
   { key: "total", label: "Total de membros", description: "Cadastros registrados", icon: UsersRound, tone: "navy" },
   { key: "active", label: "Ativos", description: "Em atividade", icon: UserRoundCheck, tone: "green" },
-  { key: "inactive", label: "Inativos", description: "Fora de atividade", icon: UserRoundX, tone: "slate" },
+  { key: "inactive", label: "Inativos", description: "Fora de atividade", icon: UserRoundX, tone: "red" },
   { key: "notRevalidated", label: "Não revalidados", description: "Precisam de acompanhamento", icon: UserRoundSearch, tone: "amber" },
 ] as const
 
 const iconTones = {
   navy: "bg-primary/8 text-primary",
   green: "bg-emerald-50 text-emerald-700",
-  slate: "bg-slate-100 text-slate-600",
+  red: "bg-red-50 text-red-700",
   amber: "bg-amber-50 text-amber-700",
 }
 
@@ -54,10 +54,10 @@ export function OverviewPage() {
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Visão geral</h1>
           <p className="mt-2 text-sm text-muted-foreground">Acompanhe os cadastros de membros da congregação.</p>
         </div>
-        <Button variant="outline" className="hidden sm:inline-flex" render={<Link href="/members" />}>
+        <Link href="/members" className={buttonVariants({ variant: "outline", className: "hidden sm:inline-flex" })}>
           Ver membros
           <ArrowRight data-icon="inline-end" />
-        </Button>
+        </Link>
       </header>
 
       {error ? (
@@ -86,9 +86,9 @@ export function OverviewPage() {
                 </span>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-semibold tracking-tight tabular-nums">
+                <div className="text-3xl font-semibold tracking-tight tabular-nums">
                   {isLoading ? <Skeleton className="h-9 w-20" aria-label="Carregando" /> : value ?? "—"}
-                </p>
+                </div>
               </CardContent>
             </Card>
           )
