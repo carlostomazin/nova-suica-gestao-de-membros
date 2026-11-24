@@ -114,7 +114,8 @@ export async function getMemberPhotoImage(path: string): Promise<{ buffer: Buffe
   if (ext === "jpg" || ext === "jpeg") return { buffer: sourceBuffer, extension: "jpeg" }
   if (ext === "webp") {
     try {
-      const sharp = (await import("sharp")).default
+      const sharpModule = "sharp"
+      const sharp = (await import(/* webpackIgnore: true */ sharpModule)).default as (input: Buffer) => { png: () => { toBuffer: () => Promise<Buffer> } }
       return { buffer: await sharp(sourceBuffer).png().toBuffer(), extension: "png" }
     } catch {
       return null
