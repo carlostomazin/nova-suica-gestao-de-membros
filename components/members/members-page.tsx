@@ -31,7 +31,7 @@ export function MembersPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [exporting, setExporting] = useState(false)
-  const { openCreateMember, openImportMembers } = useMemberActions()
+  const { openCreateMember, openEditMember, openImportMembers } = useMemberActions()
 
   const requestUrl = useMemo(() => {
     const params = new URLSearchParams({
@@ -150,7 +150,15 @@ export function MembersPage() {
                   </TableHeader>
                   <TableBody>
                     {members.map((member) => (
-                      <TableRow key={member.id}>
+                      <TableRow
+                        key={member.id}
+                        className="cursor-pointer"
+                        onClick={(event) => {
+                          const target = event.target as HTMLElement
+                          if (target.closest("button, a, [role='button'], [role='menuitem'], input, select, textarea")) return
+                          openEditMember(member)
+                        }}
+                      >
                         <TableCell className="pl-5">
                           <MemberAvatar name={member.name} photoUrl={member.photoUrl} status={member.status} className="size-10" />
                         </TableCell>
@@ -167,7 +175,15 @@ export function MembersPage() {
 
               <div className="divide-y sm:hidden">
                 {members.map((member) => (
-                  <div key={member.id} className="flex items-center gap-3 px-4 py-3.5">
+                  <div
+                    key={member.id}
+                    className="flex cursor-pointer items-center gap-3 px-4 py-3.5"
+                    onClick={(event) => {
+                      const target = event.target as HTMLElement
+                      if (target.closest("button, a, [role='button'], [role='menuitem'], input, select, textarea")) return
+                      openEditMember(member)
+                    }}
+                  >
                     <MemberAvatar name={member.name} photoUrl={member.photoUrl} status={member.status} className="size-11 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{member.name}</p>

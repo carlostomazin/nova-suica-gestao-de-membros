@@ -61,15 +61,18 @@ export function MemberAvatar({
             aria-hidden="true"
             className="fixed inset-0 z-[60] bg-black/60 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
             onPointerDown={(event) => {
-              if (event.target === event.currentTarget) setViewerOpen(false)
+              event.stopPropagation()
             }}
             onClick={(event) => {
+              event.stopPropagation()
               if (event.target === event.currentTarget) setViewerOpen(false)
             }}
           />
           <DialogPrimitive.Popup
             data-slot="dialog-content"
             className="fixed top-1/2 left-1/2 z-[60] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-2 overflow-hidden rounded-xl bg-popover p-2 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-3xl sm:p-3 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <DialogHeader className="sr-only">
               <DialogTitle>Foto do membro</DialogTitle>

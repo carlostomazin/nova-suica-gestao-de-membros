@@ -68,12 +68,18 @@ export function MemberFiltersDialog({ sortOrder, status, photo, onApply }: Membe
           <Button
             type="button"
             variant={hasActiveFilters ? "secondary" : "outline"}
-            className="h-10 shrink-0 gap-2 px-3"
+            className="relative h-10 shrink-0 gap-2 px-3"
           />
         }
       >
         <SlidersHorizontal data-icon="inline-start" />
         <span>Filtros</span>
+        {hasActiveFilters ? (
+          <span
+            aria-hidden="true"
+            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background"
+          />
+        ) : null}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
