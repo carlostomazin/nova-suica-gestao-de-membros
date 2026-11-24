@@ -75,6 +75,10 @@ export async function GET(request: Request) {
     const validStatuses = new Set(["all", "active", "inactive", "not_revalidated"])
     if (!validStatuses.has(rawStatus)) return errorResponse("Filtro de status inválido.")
 
+    const rawPhoto = searchParams.get("photo") ?? "all"
+    const validPhotoFilters = new Set(["all", "with", "without"])
+    if (!validPhotoFilters.has(rawPhoto)) return errorResponse("Filtro de foto inválido.")
+
     const rawSortOrder = searchParams.get("sort") ?? "name_asc"
     if (!validSortOrders.has(rawSortOrder as MemberSortOrder)) return errorResponse("Ordenação inválida.")
     const sortOrder = rawSortOrder as MemberSortOrder
@@ -86,6 +90,7 @@ export async function GET(request: Request) {
     const filtered = allMembers
       .filter((member) => !search || normalizeText(member.name).includes(search))
       .filter((member) => rawStatus === "all" || member.status === rawStatus)
+      .filter((member) => rawPhoto === "all" || (rawPhoto === "with" ? Boolean(member.photo_path) : !member.photo_path))
       .sort((left, right) => {
         const comparison = left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })
         return sortOrder === "name_asc" ? comparison : -comparison

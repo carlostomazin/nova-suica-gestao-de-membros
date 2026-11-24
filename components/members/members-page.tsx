@@ -14,7 +14,7 @@ import { MemberAvatar, MemberStatusBadge } from "@/components/members/member-vis
 import { MemberFiltersDialog } from "@/components/members/member-filters-dialog"
 import { useMemberActions } from "@/components/layout/member-actions-context"
 import { jsonFetcher, downloadMemberExport, type MembersResponse } from "@/lib/members/api-types"
-import type { MemberSortOrder, MemberStatus } from "@/lib/members/types"
+import type { MemberPhotoFilter, MemberSortOrder, MemberStatus } from "@/lib/members/types"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -26,6 +26,7 @@ type StatusFilterValue = "all" | MemberStatus
 export function MembersPage() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<StatusFilterValue>("all")
+  const [photo, setPhoto] = useState<MemberPhotoFilter>("all")
   const [sortOrder, setSortOrder] = useState<MemberSortOrder>("name_asc")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -36,12 +37,13 @@ export function MembersPage() {
     const params = new URLSearchParams({
       search,
       status,
+      photo,
       sort: sortOrder,
       page: String(page),
       pageSize: String(pageSize),
     })
     return `/api/members?${params.toString()}`
-  }, [search, status, sortOrder, page, pageSize])
+  }, [search, status, photo, sortOrder, page, pageSize])
 
   const { data, error, isLoading, mutate } = useSWR<MembersResponse>(
     requestUrl,
@@ -66,10 +68,11 @@ export function MembersPage() {
   const pages = data?.pages ?? 1
   const firstResult = total === 0 ? 0 : (page - 1) * pageSize + 1
   const lastResult = Math.min(page * pageSize, total)
-  const isEmptySearch = Boolean(search.trim() || status !== "all")
+  const isEmptySearch = Boolean(search.trim() || status !== "all" || photo !== "all")
 
-  function applyFilters(filters: { status: StatusFilterValue; sortOrder: MemberSortOrder }) {
+  function applyFilters(filters: { status: StatusFilterValue; photo: MemberPhotoFilter; sortOrder: MemberSortOrder }) {
     setStatus(filters.status)
+    setPhoto(filters.photo)
     setSortOrder(filters.sortOrder)
     setPage(1)
   }
@@ -124,7 +127,7 @@ export function MembersPage() {
             className="h-10 bg-background pl-10"
           />
         </div>
-        <MemberFiltersDialog sortOrder={sortOrder} status={status} onApply={applyFilters} />
+        <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
       </div>
 
       <Card className="overflow-hidden border-border/80 shadow-sm">
@@ -186,7 +189,7 @@ export function MembersPage() {
               </EmptyHeader>
               <EmptyContent className="flex-row justify-center">
                 {isEmptySearch ? (
-                  <Button type="button" variant="outline" onClick={() => { setSearch(""); setStatus("all"); setSortOrder("name_asc"); setPage(1) }}>Limpar filtros</Button>
+                  <Button type="button" variant="outline" onClick={() => { setSearch(""); setStatus("all"); setPhoto("all"); setSortOrder("name_asc"); setPage(1) }}>Limpar filtros</Button>
                 ) : (
                   <>
                     <Button type="button" onClick={openCreateMember}>Cadastrar membro</Button>

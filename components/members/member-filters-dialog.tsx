@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { MemberSortOrder, MemberStatus } from "@/lib/members/types"
+import type { MemberPhotoFilter, MemberSortOrder, MemberStatus } from "@/lib/members/types"
 
 type StatusFilterValue = "all" | MemberStatus
 
 type MemberFiltersDialogProps = {
   sortOrder: MemberSortOrder
   status: StatusFilterValue
-  onApply: (filters: { sortOrder: MemberSortOrder; status: StatusFilterValue }) => void
+  photo: MemberPhotoFilter
+  onApply: (filters: { sortOrder: MemberSortOrder; status: StatusFilterValue; photo: MemberPhotoFilter }) => void
 }
 
 const sortOptions = [
@@ -28,27 +29,35 @@ const statusOptions = [
   { value: "not_revalidated", label: "Não revalidados" },
 ] satisfies Array<{ value: StatusFilterValue; label: string }>
 
-export function MemberFiltersDialog({ sortOrder, status, onApply }: MemberFiltersDialogProps) {
+const photoOptions = [
+  { value: "all", label: "Todas" },
+  { value: "with", label: "Com foto" },
+  { value: "without", label: "Sem foto" },
+] satisfies Array<{ value: MemberPhotoFilter; label: string }>
+
+export function MemberFiltersDialog({ sortOrder, status, photo, onApply }: MemberFiltersDialogProps) {
   const [open, setOpen] = useState(false)
   const [draftSortOrder, setDraftSortOrder] = useState(sortOrder)
   const [draftStatus, setDraftStatus] = useState(status)
-  const hasActiveFilters = sortOrder !== "name_asc" || status !== "all"
+  const [draftPhoto, setDraftPhoto] = useState(photo)
+  const hasActiveFilters = sortOrder !== "name_asc" || status !== "all" || photo !== "all"
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
       setDraftSortOrder(sortOrder)
       setDraftStatus(status)
+      setDraftPhoto(photo)
     }
     setOpen(nextOpen)
   }
 
   function applyFilters() {
-    onApply({ sortOrder: draftSortOrder, status: draftStatus })
+    onApply({ sortOrder: draftSortOrder, status: draftStatus, photo: draftPhoto })
     setOpen(false)
   }
 
   function clearFilters() {
-    onApply({ sortOrder: "name_asc", status: "all" })
+    onApply({ sortOrder: "name_asc", status: "all", photo: "all" })
     setOpen(false)
   }
 
@@ -106,6 +115,26 @@ export function MemberFiltersDialog({ sortOrder, status, onApply }: MemberFilter
               <SelectContent align="start">
                 <SelectGroup>
                   {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="member-photo-filter">Foto</FieldLabel>
+            <Select
+              items={photoOptions}
+              value={draftPhoto}
+              onValueChange={(value) => value && setDraftPhoto(value as MemberPhotoFilter)}
+            >
+              <SelectTrigger id="member-photo-filter" className="w-full">
+                <SelectValue placeholder="Selecione o filtro de foto" />
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectGroup>
+                  {photoOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                   ))}
                 </SelectGroup>
