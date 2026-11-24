@@ -122,11 +122,8 @@ export function MembersPage() {
                 className="h-10 bg-background pl-10"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="sm:hidden">
-                <StatusFilter value={status} onChange={changeStatus} compact />
-              </div>
-              <span className="hidden text-sm text-muted-foreground sm:inline">Ordenados de A a Z</span>
+            <div className="sm:hidden">
+              <StatusFilter value={status} onChange={changeStatus} compact />
             </div>
           </div>
         </CardHeader>
