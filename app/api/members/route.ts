@@ -9,6 +9,14 @@ const memberInputSchema = z.object({
   name: z.string().trim().min(1, "Informe o nome completo.").max(160),
   status: z.enum(["active", "inactive", "not_revalidated"]),
   congregation: z.string().trim().min(1, "Informe a congregação.").max(120),
+  phone: z.string().trim().max(40, "O telefone deve ter no máximo 40 caracteres.").transform((value) => value || null),
+  cep: z.string().trim().max(20, "O CEP deve ter no máximo 20 caracteres.").transform((value) => value || null),
+  street: z.string().trim().max(160, "O logradouro deve ter no máximo 160 caracteres.").transform((value) => value || null),
+  number: z.string().trim().max(30, "O número deve ter no máximo 30 caracteres.").transform((value) => value || null),
+  neighborhood: z.string().trim().max(120, "O bairro deve ter no máximo 120 caracteres.").transform((value) => value || null),
+  complement: z.string().trim().max(120, "O complemento deve ter no máximo 120 caracteres.").transform((value) => value || null),
+  city: z.string().trim().max(120, "A cidade deve ter no máximo 120 caracteres.").transform((value) => value || null),
+  state: z.string().trim().max(60, "O estado deve ter no máximo 60 caracteres.").transform((value) => value || null),
 })
 
 const pageSizes = new Set([10, 25, 50, 100])
@@ -54,7 +62,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from("members")
-      .select("id, external_code, name, photo_path, status, congregation, created_at, updated_at")
+      .select("id, external_code, name, photo_path, status, congregation, phone, cep, street, number, neighborhood, complement, city, state, created_at, updated_at")
 
     if (error) return errorResponse("Não foi possível carregar os membros.", 503)
 
@@ -109,6 +117,14 @@ export async function GET(request: Request) {
           name: member.name,
           status: member.status as MemberStatus,
           congregation: member.congregation,
+          phone: member.phone ?? null,
+          cep: member.cep ?? null,
+          street: member.street ?? null,
+          number: member.number ?? null,
+          neighborhood: member.neighborhood ?? null,
+          complement: member.complement ?? null,
+          city: member.city ?? null,
+          state: member.state ?? null,
           photoUrl: member.photo_path ? signedUrls.get(member.photo_path) ?? null : null,
           createdAt: member.created_at,
           updatedAt: member.updated_at,
@@ -135,6 +151,14 @@ export async function POST(request: Request) {
       name: formData.get("name"),
       status: formData.get("status"),
       congregation: formData.get("congregation"),
+      phone: formData.get("phone") ?? "",
+      cep: formData.get("cep") ?? "",
+      street: formData.get("street") ?? "",
+      number: formData.get("number") ?? "",
+      neighborhood: formData.get("neighborhood") ?? "",
+      complement: formData.get("complement") ?? "",
+      city: formData.get("city") ?? "",
+      state: formData.get("state") ?? "",
     })
 
     if (!parsed.success) {
@@ -160,9 +184,17 @@ export async function POST(request: Request) {
         name: parsed.data.name,
         status: parsed.data.status,
         congregation: parsed.data.congregation,
+        phone: parsed.data.phone,
+        cep: parsed.data.cep,
+        street: parsed.data.street,
+        number: parsed.data.number,
+        neighborhood: parsed.data.neighborhood,
+        complement: parsed.data.complement,
+        city: parsed.data.city,
+        state: parsed.data.state,
         photo_path: photoPath,
       })
-      .select("id, name, status, congregation, photo_path, created_at, updated_at")
+      .select("id, name, status, congregation, phone, cep, street, number, neighborhood, complement, city, state, photo_path, created_at, updated_at")
       .single()
 
     if (error) {
@@ -179,6 +211,14 @@ export async function POST(request: Request) {
           name: data.name,
           status: data.status,
           congregation: data.congregation,
+          phone: data.phone ?? null,
+          cep: data.cep ?? null,
+          street: data.street ?? null,
+          number: data.number ?? null,
+          neighborhood: data.neighborhood ?? null,
+          complement: data.complement ?? null,
+          city: data.city ?? null,
+          state: data.state ?? null,
           photoUrl: data.photo_path ? signedUrls.get(data.photo_path) ?? null : null,
         },
       },

@@ -111,6 +111,14 @@ export async function POST(request: Request) {
         status: row.status,
         congregation: row.congregation,
         photo_path: nextPhotoPath,
+        ...(workbook.hasPhoneColumn ? { phone: row.phone } : {}),
+        ...(workbook.hasCepColumn ? { cep: row.cep } : {}),
+        ...(workbook.hasStreetColumn ? { street: row.street } : {}),
+        ...(workbook.hasNumberColumn ? { number: row.number } : {}),
+        ...(workbook.hasNeighborhoodColumn ? { neighborhood: row.neighborhood } : {}),
+        ...(workbook.hasComplementColumn ? { complement: row.complement } : {}),
+        ...(workbook.hasCityColumn ? { city: row.city } : {}),
+        ...(workbook.hasStateColumn ? { state: row.state } : {}),
       }
 
       if (current) {

@@ -111,42 +111,43 @@ export function MembersPage() {
         </Alert>
       ) : null}
 
-      <div className="flex flex-col gap-2 px-2 sm:px-0">
-        <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="h-10 w-full sm:hidden">
-          <Plus data-icon="inline-start" />
-          Novo membro
-        </Button>
-        <div className="flex items-center gap-2">
-          <div className="relative min-w-0 flex-1 lg:max-w-md">
-            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              aria-label="Buscar membro por nome"
-              placeholder="Buscar por nome"
-              value={search}
-              onChange={(event) => { setSearch(event.target.value); setPage(1) }}
-              className="h-10 bg-background pl-9 pr-10 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:hidden"
-            />
-            {search ? (
-              <button
-                type="button"
-                aria-label="Limpar busca"
-                onClick={() => { setSearch(""); setPage(1) }}
-                className="absolute top-1/2 right-2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <X aria-hidden="true" className="size-5" />
-              </button>
-            ) : null}
-          </div>
-          <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
-          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="hidden h-10 shrink-0 px-3 sm:ml-auto sm:inline-flex">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 px-2 sm:px-0">
+          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="h-10 w-full sm:hidden">
             <Plus data-icon="inline-start" />
             Novo membro
           </Button>
+          <div className="flex items-center gap-4">
+            <div className="relative min-w-0 flex-1 lg:max-w-md">
+              <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                aria-label="Buscar membro por nome"
+                placeholder="Buscar por nome"
+                value={search}
+                onChange={(event) => { setSearch(event.target.value); setPage(1) }}
+                className="h-10 bg-background pl-9 pr-10 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:hidden"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  aria-label="Limpar busca"
+                  onClick={() => { setSearch(""); setPage(1) }}
+                  className="absolute top-1/2 right-2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <X aria-hidden="true" className="size-5" />
+                </button>
+              ) : null}
+            </div>
+            <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
+            <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="hidden h-10 shrink-0 px-3 sm:ml-auto sm:inline-flex">
+              <Plus data-icon="inline-start" />
+              Novo membro
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <Card className="gap-0 overflow-hidden border-border/80 py-0 shadow-sm">
+        <Card className="gap-0 overflow-hidden border-border/80 py-0 shadow-sm">
         <CardContent className="p-0">
           {isLoading && !data ? (
             <div className="flex flex-col gap-4 p-5" aria-label="Carregando membros">
@@ -264,6 +265,7 @@ export function MembersPage() {
           </CardFooter>
         ) : null}
       </Card>
+      </div>
     </div>
   )
 }

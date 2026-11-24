@@ -12,6 +12,14 @@ export type ImportedMemberRow = {
   rawStatus: string
   statusNeedsReview: boolean
   congregation: string
+  phone: string | null
+  cep: string | null
+  street: string | null
+  number: string | null
+  neighborhood: string | null
+  complement: string | null
+  city: string | null
+  state: string | null
   photo?: {
     buffer: Buffer
     contentType: string
@@ -23,6 +31,14 @@ export type ImportedMemberRow = {
 export type ParsedMemberWorkbook = {
   sheetName: string
   headerRow: number
+  hasPhoneColumn: boolean
+  hasCepColumn: boolean
+  hasStreetColumn: boolean
+  hasNumberColumn: boolean
+  hasNeighborhoodColumn: boolean
+  hasComplementColumn: boolean
+  hasCityColumn: boolean
+  hasStateColumn: boolean
   rows: ImportedMemberRow[]
   ignoredRows: number
   embeddedImageCount: number
@@ -35,6 +51,14 @@ const columnAliases = {
   name: new Set(["nome", "name", "nome completo"]),
   status: new Set(["situacao", "status"]),
   congregation: new Set(["congregacao", "congregation"]),
+  phone: new Set(["telefone", "phone", "celular", "numero de telefone"]),
+  cep: new Set(["cep"]),
+  street: new Set(["logradouro", "street", "rua", "endereco"]),
+  number: new Set(["numero", "number", "nº", "n"]),
+  neighborhood: new Set(["bairro", "neighborhood", "distrito"]),
+  complement: new Set(["complemento", "complement"]),
+  city: new Set(["cidade", "city", "municipio"]),
+  state: new Set(["estado", "state", "uf"]),
 } as const
 
 function findHeader(worksheet: ExcelJS.Worksheet) {
@@ -149,6 +173,14 @@ export async function parseMemberWorkbook(buffer: Buffer): Promise<ParsedMemberW
       rawStatus,
       statusNeedsReview: normalizedStatus.needsReview,
       congregation: cellText(header.columns.congregation) || "Nova Suíça",
+      phone: cellText(header.columns.phone) || null,
+      cep: cellText(header.columns.cep) || null,
+      street: cellText(header.columns.street) || null,
+      number: cellText(header.columns.number) || null,
+      neighborhood: cellText(header.columns.neighborhood) || null,
+      complement: cellText(header.columns.complement) || null,
+      city: cellText(header.columns.city) || null,
+      state: cellText(header.columns.state) || null,
     })
   }
 
@@ -186,6 +218,14 @@ export async function parseMemberWorkbook(buffer: Buffer): Promise<ParsedMemberW
   return {
     sheetName: worksheet.name,
     headerRow: header.rowNumber,
+    hasPhoneColumn: Boolean(header.columns.phone),
+    hasCepColumn: Boolean(header.columns.cep),
+    hasStreetColumn: Boolean(header.columns.street),
+    hasNumberColumn: Boolean(header.columns.number),
+    hasNeighborhoodColumn: Boolean(header.columns.neighborhood),
+    hasComplementColumn: Boolean(header.columns.complement),
+    hasCityColumn: Boolean(header.columns.city),
+    hasStateColumn: Boolean(header.columns.state),
     rows,
     ignoredRows,
     embeddedImageCount: anchors.length,

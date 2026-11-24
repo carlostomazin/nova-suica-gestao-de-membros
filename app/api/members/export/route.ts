@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await getSupabaseAdmin()
       .from("members")
-      .select("external_code, name, status, congregation, photo_path")
+      .select("external_code, name, status, congregation, phone, cep, street, number, neighborhood, complement, city, state, photo_path")
 
     if (error) {
       return Response.json({ error: "Não foi possível carregar os membros para exportação." }, { status: 503, headers: noStoreHeaders })
@@ -57,8 +57,16 @@ export async function GET(request: Request) {
       { header: "Nome", key: "name", width: 38 },
       { header: "Situação", key: "status", width: 22 },
       { header: "Congregação", key: "congregation", width: 26 },
+      { header: "Telefone", key: "phone", width: 20 },
+      { header: "CEP", key: "cep", width: 14 },
+      { header: "Logradouro", key: "street", width: 30 },
+      { header: "Número", key: "number", width: 12 },
+      { header: "Bairro", key: "neighborhood", width: 22 },
+      { header: "Complemento", key: "complement", width: 22 },
+      { header: "Cidade", key: "city", width: 22 },
+      { header: "Estado", key: "state", width: 18 },
     ]
-    worksheet.autoFilter = "A1:E1"
+    worksheet.autoFilter = "A1:M1"
     worksheet.getRow(1).height = 24
     worksheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } }
     worksheet.getRow(1).fill = {
@@ -74,6 +82,14 @@ export async function GET(request: Request) {
         name: member.name,
         status: MEMBER_STATUS_EXPORT_LABELS[member.status as MemberStatus] ?? "",
         congregation: member.congregation,
+        phone: member.phone ?? "",
+        cep: member.cep ?? "",
+        street: member.street ?? "",
+        number: member.number ?? "",
+        neighborhood: member.neighborhood ?? "",
+        complement: member.complement ?? "",
+        city: member.city ?? "",
+        state: member.state ?? "",
       })
 
       const image = member.photo_path ? photosByPath.get(member.photo_path) : null

@@ -7,6 +7,14 @@ export type Member = {
   name: string
   status: MemberStatus
   congregation: string
+  phone: string | null
+  cep: string | null
+  street: string | null
+  number: string | null
+  neighborhood: string | null
+  complement: string | null
+  city: string | null
+  state: string | null
   photoUrl: string | null
   createdAt?: string
   updatedAt?: string

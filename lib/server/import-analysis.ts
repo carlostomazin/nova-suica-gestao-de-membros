@@ -14,6 +14,14 @@ export type AnalyzedImportRow = {
   rawStatus: string
   statusNeedsReview: boolean
   congregation: string
+  phone: string | null
+  cep: string | null
+  street: string | null
+  number: string | null
+  neighborhood: string | null
+  complement: string | null
+  city: string | null
+  state: string | null
   match: ImportMatchKind
   existingName?: string
   photoIssue?: string
@@ -69,6 +77,14 @@ export async function analyzeMemberWorkbook(buffer: Buffer) {
       rawStatus: row.rawStatus,
       statusNeedsReview: row.statusNeedsReview,
       congregation: row.congregation,
+      phone: row.phone,
+      cep: row.cep,
+      street: row.street,
+      number: row.number,
+      neighborhood: row.neighborhood,
+      complement: row.complement,
+      city: row.city,
+      state: row.state,
       match,
       existingName,
       photoIssue: row.photoIssue,
