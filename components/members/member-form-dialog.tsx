@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import useSWR, { useSWRConfig } from "swr"
-import { Camera, ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
+import { ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -23,8 +23,7 @@ type CongregationsResponse = { congregations: string[] }
 type ApiError = { error?: string }
 
 export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialogProps) {
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-  const galleryInputRef = useRef<HTMLInputElement>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const { mutate } = useSWRConfig()
   const { data: congregationData } = useSWR<CongregationsResponse>("/api/members?congregations=1", jsonFetcher)
   const congregations = [...new Set([...(congregationData?.congregations ?? []), ...(member?.congregation ? [member.congregation] : [])])]
@@ -190,22 +189,10 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                 </Avatar>
                 <div className="flex min-w-0 flex-col gap-2">
                   <input
-                    ref={cameraInputRef}
-                    id="member-photo-camera"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    capture="user"
-                    hidden
-                    onChange={(event) => {
-                      handlePhotoSelection(event.target.files?.[0])
-                      event.target.value = ""
-                    }}
-                  />
-                  <input
-                    ref={galleryInputRef}
+                    ref={photoInputRef}
                     id="member-photo"
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/*"
                     hidden
                     onChange={(event) => {
                       handlePhotoSelection(event.target.files?.[0])
@@ -213,13 +200,9 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                     }}
                   />
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
-                      <Camera data-icon="inline-start" />
-                      Abrir câmera
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => galleryInputRef.current?.click()}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => photoInputRef.current?.click()}>
                       <ImagePlus data-icon="inline-start" />
-                      Escolher da galeria
+                      {photoPreview ? "Trocar foto" : "Adicionar foto"}
                     </Button>
                     {photoPreview ? (
                       <Button
@@ -230,8 +213,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                           setPhoto(null)
                           setPhotoPreview(null)
                           setRemovePhoto(Boolean(member?.photoUrl))
-                          if (cameraInputRef.current) cameraInputRef.current.value = ""
-                          if (galleryInputRef.current) galleryInputRef.current.value = ""
+                          if (photoInputRef.current) photoInputRef.current.value = ""
                         }}
                       >
                         <Trash2 data-icon="inline-start" />
