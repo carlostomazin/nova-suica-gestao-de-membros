@@ -1,10 +1,12 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { AppShell } from '@/components/layout/app-shell'
+import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Membros Nova Suíça',
+  description: 'Cadastro seguro e organizado de membros da congregação Nova Suíça.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -26,11 +28,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  width: 'device-width',
+  initialScale: 1,
+  colorScheme: 'light',
+  themeColor: '#f6f7f9',
 }
 
 export default function RootLayout({
@@ -39,9 +40,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR" className="light">
       <body className="antialiased">
-        {children}
+        <AppShell>{children}</AppShell>
+        <Toaster theme="light" position="top-right" richColors closeButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
