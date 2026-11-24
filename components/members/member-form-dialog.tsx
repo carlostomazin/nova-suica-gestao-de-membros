@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useSWRConfig } from "swr"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Camera, CircleCheck, ImagePlus, LoaderCircle, MapPin, UserRound, X } from "lucide-react"
+import { Camera, CircleCheck, ImagePlus, LoaderCircle, MapPin, Trash2, UserRound, X } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -432,6 +432,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                   type="button"
                   variant="ghost"
                   size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => {
                     setPhoto(null)
                     setPhotoPreview(null)
@@ -440,6 +441,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                     if (galleryInputRef.current) galleryInputRef.current.value = ""
                   }}
                 >
+                  <Trash2 data-icon="inline-start" />
                   Remover
                 </Button>
               ) : null}
