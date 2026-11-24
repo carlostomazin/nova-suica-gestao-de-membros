@@ -1,16 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
-import useSWR, { useSWRConfig } from "swr"
+import { useSWRConfig } from "swr"
 import { ImagePlus, LoaderCircle, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { jsonFetcher } from "@/lib/members/api-types"
 import { MEMBER_STATUS_LABELS, type Member, type MemberStatus } from "@/lib/members/types"
 
 type MemberFormDialogProps = {
@@ -19,7 +18,6 @@ type MemberFormDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-type CongregationsResponse = { congregations: string[] }
 type ApiError = { error?: string }
 
 const memberStatusOptions: { value: MemberStatus; label: string }[] = [
@@ -30,13 +28,10 @@ const memberStatusOptions: { value: MemberStatus; label: string }[] = [
 
 export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialogProps) {
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const dialogTitleRef = useRef<HTMLHeadingElement>(null)
   const { mutate } = useSWRConfig()
-  const { data: congregationData } = useSWR<CongregationsResponse>("/api/members?congregations=1", jsonFetcher)
-  const congregations = [...new Set([...(congregationData?.congregations ?? []), ...(member?.congregation ? [member.congregation] : [])])]
   const [name, setName] = useState("")
   const [status, setStatus] = useState<MemberStatus>("active")
-  const [congregation, setCongregation] = useState("Nova Suíça")
-  const [useCustomCongregation, setUseCustomCongregation] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
   const [removePhoto, setRemovePhoto] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -44,11 +39,8 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
 
   useEffect(() => {
     if (!open) return
-    const initialCongregation = member?.congregation ?? "Nova Suíça"
     setName(member?.name ?? "")
     setStatus(member?.status ?? "active")
-    setCongregation(initialCongregation)
-    setUseCustomCongregation(false)
     setPhoto(null)
     setRemovePhoto(false)
     setPhotoPreview(member?.photoUrl ?? null)
@@ -82,7 +74,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     const formData = new FormData()
     formData.set("name", name.trim())
     formData.set("status", status)
-    formData.set("congregation", congregation.trim())
+    formData.set("congregation", member?.congregation?.trim() || "Nova Suíça")
     if (photo) formData.set("photo", photo)
     if (removePhoto) formData.set("removePhoto", "true")
 
@@ -104,14 +96,16 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     }
   }
 
-  const customSelectValue = useCustomCongregation ? "__custom__" : congregation
   const initials = name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("")
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
+        initialFocus={member ? dialogTitleRef : undefined}
+      >
         <DialogHeader>
-          <DialogTitle>{member ? "Editar membro" : "Cadastrar membro"}</DialogTitle>
+          <DialogTitle ref={dialogTitleRef} tabIndex={-1}>{member ? "Editar membro" : "Cadastrar membro"}</DialogTitle>
           <DialogDescription>
             {member ? "Atualize os dados do cadastro. O código original será preservado." : "Preencha os dados principais para adicionar uma pessoa à Nova Suíça."}
           </DialogDescription>
@@ -146,44 +140,6 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="member-congregation-select">Congregação</FieldLabel>
-              <Select
-                value={customSelectValue}
-                onValueChange={(value) => {
-                  if (value === "__custom__") {
-                    setUseCustomCongregation(true)
-                    setCongregation("")
-                  } else if (value) {
-                    setUseCustomCongregation(false)
-                    setCongregation(value)
-                  }
-                }}
-              >
-                <SelectTrigger id="member-congregation-select" className="w-full">
-                  <SelectValue placeholder="Selecione uma congregação" />
-                </SelectTrigger>
-                <SelectContent align="start">
-                  <SelectGroup>
-                    {congregations.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
-                    <SelectItem value="__custom__">Adicionar outra congregação…</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              {useCustomCongregation ? (
-                <Input
-                  id="member-custom-congregation"
-                  aria-label="Nome da nova congregação"
-                  value={congregation}
-                  onChange={(event) => setCongregation(event.target.value)}
-                  maxLength={120}
-                  placeholder="Digite o nome da congregação"
-                  required
-                />
-              ) : null}
-              <FieldDescription>Escolha uma congregação existente ou adicione uma nova.</FieldDescription>
             </Field>
 
             <Field>
@@ -236,7 +192,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={pending || !congregation.trim()}>
+            <Button type="submit" disabled={pending}>
               {pending ? <LoaderCircle className="animate-spin" data-icon="inline-start" /> : null}
               {member ? "Salvar alterações" : "Cadastrar membro"}
             </Button>
