@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     },
   }), [])
 
-  if (pathname === "/login") return <>{children}</>
+  if (pathname === "/login" || pathname === "/access-denied") return <>{children}</>
 
   async function signOut() {
     setSigningOut(true)

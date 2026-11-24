@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createServerClient } from "@supabase/ssr"
+import type { User } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
 function getPublicSupabaseConfig() {
@@ -12,6 +13,14 @@ function getPublicSupabaseConfig() {
 
   if (!url || !key) throw new Error("A autenticação Supabase não está configurada.")
   return { url, key }
+}
+
+export function hasMembersAccess(user: User) {
+  return (
+    user.app_metadata?.members_access === true ||
+    user.app_metadata?.role === "members_admin" ||
+    user.app_metadata?.role === "admin"
+  )
 }
 
 export async function requireAuthenticatedUser() {
@@ -40,6 +49,12 @@ export async function requireAuthenticatedUser() {
       return Response.json(
         { error: "Sua sessão expirou. Entre novamente para continuar." },
         { status: 401, headers: { "Cache-Control": "no-store" } },
+      )
+    }
+    if (!hasMembersAccess(data.user)) {
+      return Response.json(
+        { error: "Sua conta não tem permissão para acessar o cadastro." },
+        { status: 403, headers: { "Cache-Control": "no-store" } },
       )
     }
 

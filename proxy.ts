@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
-import { getPublicSupabaseConfig } from "@/lib/server/auth"
+import { getPublicSupabaseConfig, hasMembersAccess } from "@/lib/server/auth"
 
 export async function proxy(request: NextRequest) {
   const { url, key } = getPublicSupabaseConfig()
@@ -23,23 +23,42 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getUser()
   const isLoginPage = request.nextUrl.pathname === "/login"
+  const isAccessDeniedPage = request.nextUrl.pathname === "/access-denied"
   const isApiRequest = request.nextUrl.pathname.startsWith("/api/")
+  const hasAccess = Boolean(data.user && hasMembersAccess(data.user))
 
-  if (isLoginPage && data.user) {
-    return NextResponse.redirect(new URL("/", request.url))
-  }
-
-  if (!data.user && isApiRequest) {
+  if (isApiRequest && !data.user) {
     return NextResponse.json(
       { error: "Sua sessão expirou. Entre novamente para continuar." },
       { status: 401, headers: { "Cache-Control": "no-store" } },
     )
   }
 
+  if (isApiRequest && !hasAccess) {
+    return NextResponse.json(
+      { error: "Sua conta não tem permissão para acessar o cadastro." },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    )
+  }
+
+  if (isLoginPage && data.user) {
+    return NextResponse.redirect(new URL(hasAccess ? "/" : "/access-denied", request.url))
+  }
+
+  if (isAccessDeniedPage) {
+    if (!data.user) return NextResponse.redirect(new URL("/login", request.url))
+    if (hasAccess) return NextResponse.redirect(new URL("/", request.url))
+    return response
+  }
+
   if (!data.user && !isLoginPage) {
     const loginUrl = new URL("/login", request.url)
     loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`)
     return NextResponse.redirect(loginUrl)
+  }
+
+  if (data.user && !hasAccess) {
+    return NextResponse.redirect(new URL("/access-denied", request.url))
   }
 
   return response
