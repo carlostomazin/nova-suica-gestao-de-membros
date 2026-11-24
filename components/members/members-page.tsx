@@ -78,7 +78,7 @@ export function MembersPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="px-2 sm:px-0">
           <p className="text-sm font-medium text-primary">Nova Suíça · Administração</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Membros</h1>
           <p className="mt-2 text-sm text-muted-foreground">Gerencie os membros da Igreja Nova Suíça</p>

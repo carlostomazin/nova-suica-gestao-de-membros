@@ -19,13 +19,13 @@ const navigationItems = [
 
 function Brand({ mobile = false, compact = false }: { mobile?: boolean; compact?: boolean }) {
   return (
-    <div className={cn("flex items-center gap-3", compact ? "px-0 py-0" : mobile ? "px-5 py-5" : "px-6 py-7")}>
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+    <div className={cn("flex items-center gap-3", compact ? "px-0 py-0" : mobile ? "px-5 py-2" : "px-6 py-7")}>
+      <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", mobile && !compact ? "bg-primary/10 text-primary" : "bg-white/10 text-white")}>
         <UsersRound aria-hidden="true" />
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-sm font-semibold tracking-wide text-white">NOVA SUÍÇA</span>
-        <span className="mt-0.5 text-xs text-white/55">Gestão de membros</span>
+        <span className={cn("truncate text-sm font-semibold tracking-wide", mobile && !compact ? "text-foreground" : "text-white")}>NOVA SUÍÇA</span>
+        <span className={cn("mt-0.5 text-xs", mobile && !compact ? "text-muted-foreground" : "text-white/55")}>Gestão de membros</span>
       </span>
     </div>
   )
@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="min-h-screen lg:pl-64">
-          <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6 lg:hidden">
+          <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6 lg:hidden">
             <Brand mobile />
             <Button
               type="button"
