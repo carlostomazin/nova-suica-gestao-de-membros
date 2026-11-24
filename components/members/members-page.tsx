@@ -112,7 +112,7 @@ export function MembersPage() {
       ) : null}
 
       <div className="flex flex-col gap-2 px-2 sm:px-0">
-        <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="w-full sm:hidden">
+        <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="h-10 w-full sm:hidden">
           <Plus data-icon="inline-start" />
           Novo membro
         </Button>
@@ -139,7 +139,7 @@ export function MembersPage() {
             ) : null}
           </div>
           <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
-          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="hidden shrink-0 px-3 sm:inline-flex">
+          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="hidden h-10 shrink-0 px-3 sm:ml-auto sm:inline-flex">
             <Plus data-icon="inline-start" />
             Novo membro
           </Button>
