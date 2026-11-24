@@ -11,7 +11,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { jsonFetcher } from "@/lib/members/api-types"
-import type { Member, MemberStatus } from "@/lib/members/types"
+import { MEMBER_STATUS_LABELS, type Member, type MemberStatus } from "@/lib/members/types"
 
 type MemberFormDialogProps = {
   open: boolean
@@ -21,6 +21,12 @@ type MemberFormDialogProps = {
 
 type CongregationsResponse = { congregations: string[] }
 type ApiError = { error?: string }
+
+const memberStatusOptions: { value: MemberStatus; label: string }[] = [
+  { value: "active", label: MEMBER_STATUS_LABELS.active },
+  { value: "inactive", label: MEMBER_STATUS_LABELS.inactive },
+  { value: "not_revalidated", label: MEMBER_STATUS_LABELS.not_revalidated },
+]
 
 export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialogProps) {
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -128,15 +134,15 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
 
             <Field>
               <FieldLabel htmlFor="member-status">Situação</FieldLabel>
-              <Select value={status} onValueChange={(value) => value && setStatus(value as MemberStatus)}>
+              <Select items={memberStatusOptions} value={status} onValueChange={(value) => value && setStatus(value as MemberStatus)}>
                 <SelectTrigger id="member-status" className="w-full">
                   <SelectValue placeholder="Selecione a situação" />
                 </SelectTrigger>
                 <SelectContent align="start">
                   <SelectGroup>
-                    <SelectItem value="active">Ativo</SelectItem>
-                    <SelectItem value="inactive">Inativo</SelectItem>
-                    <SelectItem value="not_revalidated">Não revalidado</SelectItem>
+                    {memberStatusOptions.map(({ value, label }) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
