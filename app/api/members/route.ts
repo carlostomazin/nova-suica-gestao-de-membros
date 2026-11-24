@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { z } from "zod"
 import { normalizeText } from "@/lib/members/normalization"
-import type { MemberStatus } from "@/lib/members/types"
+import type { MemberSortOrder, MemberStatus } from "@/lib/members/types"
 import { getSignedPhotoUrls, imagePayloadFromBuffer, imagePayloadFromFile, removeMemberPhotos, uploadMemberPhoto } from "@/lib/server/member-photos"
 import { getSupabaseAdmin } from "@/lib/server/supabase-admin"
 
@@ -12,6 +12,7 @@ const memberInputSchema = z.object({
 })
 
 const pageSizes = new Set([10, 25, 50, 100])
+const validSortOrders = new Set<MemberSortOrder>(["name_asc", "name_desc"])
 const noStoreHeaders = { "Cache-Control": "no-store" }
 
 function errorResponse(message: string, status = 400) {
@@ -74,6 +75,10 @@ export async function GET(request: Request) {
     const validStatuses = new Set(["all", "active", "inactive", "not_revalidated"])
     if (!validStatuses.has(rawStatus)) return errorResponse("Filtro de status inválido.")
 
+    const rawSortOrder = searchParams.get("sort") ?? "name_asc"
+    if (!validSortOrders.has(rawSortOrder as MemberSortOrder)) return errorResponse("Ordenação inválida.")
+    const sortOrder = rawSortOrder as MemberSortOrder
+
     const page = Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1)
     const pageSize = Number.parseInt(searchParams.get("pageSize") ?? "10", 10) || 10
     if (!pageSizes.has(pageSize)) return errorResponse("Tamanho de página inválido.")
@@ -81,7 +86,10 @@ export async function GET(request: Request) {
     const filtered = allMembers
       .filter((member) => !search || normalizeText(member.name).includes(search))
       .filter((member) => rawStatus === "all" || member.status === rawStatus)
-      .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }))
+      .sort((left, right) => {
+        const comparison = left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" })
+        return sortOrder === "name_asc" ? comparison : -comparison
+      })
 
     const total = filtered.length
     const pageMembers = filtered.slice((page - 1) * pageSize, page * pageSize)

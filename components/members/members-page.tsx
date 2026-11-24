@@ -11,10 +11,10 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Input } from "@/components/ui/input"
 import { MemberRowActions } from "@/components/members/member-row-actions"
 import { MemberAvatar, MemberStatusBadge } from "@/components/members/member-visuals"
-import { StatusFilter } from "@/components/members/status-filter"
+import { MemberFiltersDialog } from "@/components/members/member-filters-dialog"
 import { useMemberActions } from "@/components/layout/member-actions-context"
 import { jsonFetcher, downloadMemberExport, type MembersResponse } from "@/lib/members/api-types"
-import type { MemberStatus } from "@/lib/members/types"
+import type { MemberSortOrder, MemberStatus } from "@/lib/members/types"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -27,6 +27,7 @@ type StatusFilterValue = "all" | MemberStatus
 export function MembersPage() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<StatusFilterValue>("all")
+  const [sortOrder, setSortOrder] = useState<MemberSortOrder>("name_asc")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [exporting, setExporting] = useState(false)
@@ -36,11 +37,12 @@ export function MembersPage() {
     const params = new URLSearchParams({
       search,
       status,
+      sort: sortOrder,
       page: String(page),
       pageSize: String(pageSize),
     })
     return `/api/members?${params.toString()}`
-  }, [search, status, page, pageSize])
+  }, [search, status, sortOrder, page, pageSize])
 
   const { data, error, isLoading, mutate } = useSWR<MembersResponse>(
     requestUrl,
@@ -67,8 +69,9 @@ export function MembersPage() {
   const lastResult = Math.min(page * pageSize, total)
   const isEmptySearch = Boolean(search.trim() || status !== "all")
 
-  function changeStatus(next: StatusFilterValue) {
-    setStatus(next)
+  function applyFilters(filters: { status: StatusFilterValue; sortOrder: MemberSortOrder }) {
+    setStatus(filters.status)
+    setSortOrder(filters.sortOrder)
     setPage(1)
   }
 
@@ -110,7 +113,7 @@ export function MembersPage() {
 
       <Card className="overflow-hidden border-border/80 shadow-sm">
         <CardHeader className="border-b py-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex items-center gap-2">
             <div className="relative min-w-0 flex-1 lg:max-w-md">
               <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -122,9 +125,7 @@ export function MembersPage() {
                 className="h-10 bg-background pl-10"
               />
             </div>
-            <div className="sm:hidden">
-              <StatusFilter value={status} onChange={changeStatus} compact />
-            </div>
+            <MemberFiltersDialog sortOrder={sortOrder} status={status} onApply={applyFilters} />
           </div>
         </CardHeader>
 
@@ -141,9 +142,7 @@ export function MembersPage() {
                     <TableRow className="bg-muted/35 hover:bg-muted/35">
                       <TableHead className="w-20 pl-5">Foto</TableHead>
                       <TableHead>Nome completo</TableHead>
-                      <TableHead className="w-52">
-                        <StatusFilter value={status} onChange={changeStatus} />
-                      </TableHead>
+                      <TableHead className="w-52">Situação</TableHead>
                       <TableHead className="w-16 pr-5 text-right"><span className="sr-only">Ações</span></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -188,7 +187,7 @@ export function MembersPage() {
               </EmptyHeader>
               <EmptyContent className="flex-row justify-center">
                 {isEmptySearch ? (
-                  <Button type="button" variant="outline" onClick={() => { setSearch(""); setStatus("all"); setPage(1) }}>Limpar filtros</Button>
+                  <Button type="button" variant="outline" onClick={() => { setSearch(""); setStatus("all"); setSortOrder("name_asc"); setPage(1) }}>Limpar filtros</Button>
                 ) : (
                   <>
                     <Button type="button" onClick={openCreateMember}>Cadastrar membro</Button>

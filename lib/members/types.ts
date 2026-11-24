@@ -1,4 +1,5 @@
 export type MemberStatus = "active" | "inactive" | "not_revalidated"
+export type MemberSortOrder = "name_asc" | "name_desc"
 
 export type Member = {
   id: string
