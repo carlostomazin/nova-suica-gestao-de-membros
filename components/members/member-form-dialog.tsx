@@ -44,7 +44,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
       setPhotoViewerOpen(false)
       return
     }
-    setName(member?.name ?? "")
+    setName((member?.name ?? "").toLocaleUpperCase("pt-BR"))
     setStatus(member?.status ?? "active")
     setPhoto(null)
     setRemovePhoto(false)
@@ -123,10 +123,10 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
               <Input
                 id="member-name"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) => setName(event.target.value.toLocaleUpperCase("pt-BR"))}
                 maxLength={160}
                 autoComplete="name"
-                placeholder="Ex.: Ana Maria da Silva"
+                placeholder="Ex.: ANA MARIA DA SILVA"
                 required
               />
             </Field>
