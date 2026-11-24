@@ -370,9 +370,6 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
       >
         <DialogHeader>
           <DialogTitle ref={dialogTitleRef} tabIndex={-1}>{member ? "Editar membro" : "Cadastrar membro"}</DialogTitle>
-          <DialogDescription>
-            {member ? "Atualize os dados do cadastro." : "Preencha os dados para cadastrar um novo membro."}
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
