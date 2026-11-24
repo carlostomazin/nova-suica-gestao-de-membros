@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import useSWR from "swr"
-import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, LoaderCircle, Plus, Search, UsersRound } from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, LoaderCircle, Plus, Search, UsersRound, X } from "lucide-react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -79,36 +79,27 @@ export function MembersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="px-2 sm:px-0">
-          <h1 className="text-3xl font-semibold tracking-tight">Membros</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={openImportMembers} aria-label="Importar membros">
-            <FileSpreadsheet data-icon="inline-start" />
-            Importar
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void exportMembers("all")}
-            disabled={exporting}
-            aria-label="Exportar membros"
-            aria-busy={exporting}
+      <section aria-label="Indicadores de membros" className="grid grid-cols-4 gap-2 px-2 sm:px-0">
+        {[
+          { key: "total", label: "Total", value: data?.stats?.total, dotClass: "bg-primary" },
+          { key: "active", label: "Ativos", value: data?.stats?.active, dotClass: "bg-emerald-500" },
+          { key: "inactive", label: "Inativos", value: data?.stats?.inactive, dotClass: "bg-red-500" },
+          { key: "notRevalidated", label: "Não revalidados", value: data?.stats?.notRevalidated, dotClass: "bg-amber-500" },
+        ].map((item) => (
+          <div
+            key={item.key}
+            className="flex min-w-0 flex-col gap-1 rounded-lg border border-border/80 bg-card p-2 sm:p-2.5"
           >
-            {exporting ? (
-              <LoaderCircle data-icon="inline-start" className="animate-spin" />
-            ) : (
-              <Download data-icon="inline-start" />
-            )}
-            {exporting ? "Exportando..." : "Exportar"}
-          </Button>
-          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="px-2.5 sm:px-3">
-            <Plus data-icon="inline-start" />
-            Novo
-          </Button>
-        </div>
-      </header>
+            <div className="flex items-center gap-1.5">
+              <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${item.dotClass}`} />
+              <span className="truncate text-[11px] leading-tight text-muted-foreground sm:text-xs">{item.label}</span>
+            </div>
+            <span className="text-sm font-semibold tabular-nums text-foreground sm:text-base">
+              {isLoading && !data ? <Skeleton className="inline-block h-4 w-8 align-middle" /> : item.value ?? "—"}
+            </span>
+          </div>
+        ))}
+      </section>
 
       {error ? (
         <Alert variant="destructive">
@@ -120,19 +111,39 @@ export function MembersPage() {
         </Alert>
       ) : null}
 
-      <div className="flex items-center gap-2">
-        <div className="relative min-w-0 flex-1 lg:max-w-md">
-          <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            aria-label="Buscar membro por nome"
-            placeholder="Buscar por nome"
-            value={search}
-            onChange={(event) => { setSearch(event.target.value); setPage(1) }}
-            className="h-10 bg-background pl-10"
-          />
+      <div className="flex flex-col gap-2 px-2 sm:px-0">
+        <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="w-full sm:hidden">
+          <Plus data-icon="inline-start" />
+          Novo membro
+        </Button>
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1 lg:max-w-md">
+            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              aria-label="Buscar membro por nome"
+              placeholder="Buscar por nome"
+              value={search}
+              onChange={(event) => { setSearch(event.target.value); setPage(1) }}
+              className="h-10 bg-background pl-9 pr-10 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:hidden"
+            />
+            {search ? (
+              <button
+                type="button"
+                aria-label="Limpar busca"
+                onClick={() => { setSearch(""); setPage(1) }}
+                className="absolute top-1/2 right-2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X aria-hidden="true" className="size-5" />
+              </button>
+            ) : null}
+          </div>
+          <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
+          <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="hidden shrink-0 px-3 sm:inline-flex">
+            <Plus data-icon="inline-start" />
+            Novo membro
+          </Button>
         </div>
-        <MemberFiltersDialog sortOrder={sortOrder} status={status} photo={photo} onApply={applyFilters} />
       </div>
 
       <Card className="gap-0 overflow-hidden border-border/80 py-0 shadow-sm">
