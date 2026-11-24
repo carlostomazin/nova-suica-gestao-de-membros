@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className="antialiased">
         <AppShell>{children}</AppShell>
         <Toaster theme="light" position="top-right" richColors closeButton />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )

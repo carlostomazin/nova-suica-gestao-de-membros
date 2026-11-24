@@ -81,7 +81,7 @@ export async function GET(request: Request) {
 
       const rowNumber = index + 2
       worksheet.getRow(rowNumber).height = 56
-      const imageId = workbook.addImage({ buffer: image.buffer, extension: image.extension })
+      const imageId = workbook.addImage({ buffer: image.buffer as any, extension: image.extension })
       worksheet.addImage(imageId, {
         tl: { col: 0, row: rowNumber - 1 },
         ext: { width: 56, height: 56 },
@@ -90,9 +90,9 @@ export async function GET(request: Request) {
     })
 
     const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date())
-    const file = Buffer.from(await workbook.xlsx.writeBuffer())
+    const buffer = await workbook.xlsx.writeBuffer()
 
-    return new Response(file, {
+    return new Response(buffer as unknown as BodyInit, {
       headers: {
         ...noStoreHeaders,
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
