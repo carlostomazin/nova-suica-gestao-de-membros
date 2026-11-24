@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import useSWR from "swr"
-import { ChevronDown, ChevronLeft, ChevronRight, Download, FileSpreadsheet, Plus, Search, UsersRound } from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, FileSpreadsheet, Plus, Search, UsersRound } from "lucide-react"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,6 @@ import { MemberFiltersDialog } from "@/components/members/member-filters-dialog"
 import { useMemberActions } from "@/components/layout/member-actions-context"
 import { jsonFetcher, downloadMemberExport, type MembersResponse } from "@/lib/members/api-types"
 import type { MemberSortOrder, MemberStatus } from "@/lib/members/types"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -86,11 +85,16 @@ export function MembersPage() {
             <FileSpreadsheet data-icon="inline-start" />
             Importar
           </Button>
-          <ExportMenu
-            exporting={exporting}
-            onExportAll={() => void exportMembers("all")}
-            onExportFiltered={() => void exportMembers("filtered")}
-          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void exportMembers("all")}
+            disabled={exporting}
+            aria-label="Exportar membros"
+          >
+            <Download data-icon="inline-start" />
+            Exportar
+          </Button>
           <Button type="button" onClick={openCreateMember} aria-label="Novo membro" className="px-2.5 sm:px-3">
             <Plus data-icon="inline-start" />
             Novo
@@ -230,34 +234,3 @@ export function MembersPage() {
   )
 }
 
-function ExportMenu({
-  exporting,
-  onExportAll,
-  onExportFiltered,
-}: {
-  exporting: boolean
-  onExportAll: () => void
-  onExportFiltered: () => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button type="button" variant="outline" disabled={exporting} aria-label="Exportar membros" />}>
-        <Download data-icon="inline-start" />
-        Exportar
-        <ChevronDown data-icon="inline-end" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={onExportAll}>
-            <Download data-icon="inline-start" />
-            Exportar todos
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onExportFiltered}>
-            <FileSpreadsheet data-icon="inline-start" />
-            Exportar resultado atual
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
