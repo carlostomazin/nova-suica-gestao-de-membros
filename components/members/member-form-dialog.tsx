@@ -295,12 +295,34 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     return stream
   }
 
-  function handleOpenCamera() {
+  async function handleOpenCamera() {
+    if (cameraStarting) return
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       cameraInputRef.current?.click()
       return
     }
-    setCameraOpen(true)
+
+    setCameraStarting(true)
+    stopCameraStream()
+    try {
+      await startCameraStream()
+      setCameraOpen(true)
+    } catch (error) {
+      if (error instanceof Error && error.message === "UNSUPPORTED") {
+        cameraInputRef.current?.click()
+        return
+      }
+      const denied =
+        error instanceof DOMException &&
+        (error.name === "NotAllowedError" || error.name === "PermissionDeniedError" || error.name === "SecurityError")
+      toast.error(
+        denied
+          ? "Permissão da câmera negada ou bloqueada. Verifique as permissões do site no navegador e se a página está em HTTPS."
+          : "Não foi possível acessar a webcam.",
+      )
+    } finally {
+      setCameraStarting(false)
+    }
   }
 
   async function handleCapturePhoto() {
@@ -332,37 +354,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
   }
 
   useEffect(() => {
-    if (!cameraOpen) {
-      setCameraStarting(false)
-      stopCameraStream()
-      return
-    }
-
-    let cancelled = false
-    setCameraStarting(true)
-    void startCameraStream()
-      .catch((error) => {
-        if (cancelled) return
-        setCameraOpen(false)
-        if (error instanceof Error && error.message === "UNSUPPORTED") {
-          cameraInputRef.current?.click()
-          return
-        }
-        const denied = error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "PermissionDeniedError")
-        toast.error(
-          denied
-            ? "Permissão da câmera negada. Verifique as permissões do navegador."
-            : "Não foi possível acessar a webcam.",
-        )
-      })
-      .finally(() => {
-        if (!cancelled) setCameraStarting(false)
-      })
-
-    return () => {
-      cancelled = true
-      stopCameraStream()
-    }
+    if (!cameraOpen) stopCameraStream()
   }, [cameraOpen])
 
   useEffect(() => {
@@ -517,8 +509,8 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
               }}
             />
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={handleOpenCamera}>
-                <Camera data-icon="inline-start" />
+              <Button type="button" variant="outline" size="sm" onClick={() => void handleOpenCamera()} disabled={cameraStarting}>
+                {cameraStarting ? <LoaderCircle className="animate-spin" data-icon="inline-start" /> : <Camera data-icon="inline-start" />}
                 Tirar foto
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => galleryInputRef.current?.click()}>
