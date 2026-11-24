@@ -7,7 +7,7 @@ import { ImagePlus, LoaderCircle, Trash2, X } from "lucide-react"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogPortal, DialogTitle } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -220,7 +220,16 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
 
         <Dialog open={photoViewerOpen && Boolean(photoPreview)} onOpenChange={setPhotoViewerOpen}>
           <DialogPortal>
-            <DialogOverlay className="z-[60] bg-black/60" onClick={() => setPhotoViewerOpen(false)} />
+            <div
+              aria-hidden="true"
+              className="fixed inset-0 z-[60] bg-black/60 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+              onPointerDown={(event) => {
+                if (event.target === event.currentTarget) setPhotoViewerOpen(false)
+              }}
+              onClick={(event) => {
+                if (event.target === event.currentTarget) setPhotoViewerOpen(false)
+              }}
+            />
             <DialogPrimitive.Popup
               data-slot="dialog-content"
               className="fixed top-1/2 left-1/2 z-[60] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-2 overflow-hidden rounded-xl bg-popover p-2 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-3xl sm:p-3 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
