@@ -77,7 +77,7 @@ export function MemberFiltersDialog({ sortOrder, status, photo, onApply }: Membe
         {hasActiveFilters ? (
           <span
             aria-hidden="true"
-            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-background"
+            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500 ring-2 ring-background"
           />
         ) : null}
       </DialogTrigger>
