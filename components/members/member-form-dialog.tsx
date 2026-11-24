@@ -111,6 +111,10 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
   const [removePhoto, setRemovePhoto] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false)
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const [cameraStarting, setCameraStarting] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const [pending, setPending] = useState(false)
   const [cepLoading, setCepLoading] = useState(false)
   const [cepLookupStatus, setCepLookupStatus] = useState<"idle" | "success" | "not_found">("idle")
@@ -266,9 +270,106 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
     }
   }
 
+  function attachCameraStream(video: HTMLVideoElement | null) {
+    if (!video || !streamRef.current) return
+    video.srcObject = streamRef.current
+    void video.play().catch(() => undefined)
+  }
+
+  function stopCameraStream() {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    if (videoRef.current) videoRef.current.srcObject = null
+  }
+
+  async function startCameraStream() {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      throw new Error("UNSUPPORTED")
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false,
+    })
+    streamRef.current = stream
+    attachCameraStream(videoRef.current)
+    return stream
+  }
+
+  function handleOpenCamera() {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click()
+      return
+    }
+    setCameraOpen(true)
+  }
+
+  async function handleCapturePhoto() {
+    const video = videoRef.current
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      toast.error("A câmera ainda não está pronta.")
+      return
+    }
+
+    const canvas = document.createElement("canvas")
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const context = canvas.getContext("2d")
+    if (!context) {
+      toast.error("Não foi possível capturar a foto.")
+      return
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92))
+    if (!blob) {
+      toast.error("Não foi possível capturar a foto.")
+      return
+    }
+
+    const file = new File([blob], `foto-membro-${Date.now()}.jpg`, { type: "image/jpeg" })
+    handlePhotoSelection(file)
+    setCameraOpen(false)
+  }
+
+  useEffect(() => {
+    if (!cameraOpen) {
+      setCameraStarting(false)
+      stopCameraStream()
+      return
+    }
+
+    let cancelled = false
+    setCameraStarting(true)
+    void startCameraStream()
+      .catch((error) => {
+        if (cancelled) return
+        setCameraOpen(false)
+        if (error instanceof Error && error.message === "UNSUPPORTED") {
+          cameraInputRef.current?.click()
+          return
+        }
+        const denied = error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "PermissionDeniedError")
+        toast.error(
+          denied
+            ? "Permissão da câmera negada. Verifique as permissões do navegador."
+            : "Não foi possível acessar a webcam.",
+        )
+      })
+      .finally(() => {
+        if (!cancelled) setCameraStarting(false)
+      })
+
+    return () => {
+      cancelled = true
+      stopCameraStream()
+    }
+  }, [cameraOpen])
+
   useEffect(() => {
     if (!open) {
       setPhotoViewerOpen(false)
+      setCameraOpen(false)
+      stopCameraStream()
       cityRequestId.current += 1
       setCities([])
       setCitiesLoading(false)
@@ -416,7 +517,7 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
               }}
             />
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
+              <Button type="button" variant="outline" size="sm" onClick={handleOpenCamera}>
                 <Camera data-icon="inline-start" />
                 Tirar foto
               </Button>
@@ -672,6 +773,51 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
             </Button>
           </DialogFooter>
         </form>
+
+        <Dialog open={cameraOpen} onOpenChange={(nextOpen) => setCameraOpen(nextOpen)}>
+          <DialogPortal>
+            <div
+              aria-hidden="true"
+              className="fixed inset-0 z-[60] bg-black/60 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+              onPointerDown={(event) => {
+                if (event.target === event.currentTarget) setCameraOpen(false)
+              }}
+              onClick={(event) => {
+                if (event.target === event.currentTarget) setCameraOpen(false)
+              }}
+            />
+            <DialogPrimitive.Popup
+              data-slot="dialog-content"
+              className="fixed top-1/2 left-1/2 z-[60] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-3 overflow-hidden rounded-xl bg-popover p-3 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-xl data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+            >
+              <DialogHeader>
+                <DialogTitle>Tirar foto</DialogTitle>
+                <DialogDescription>Posicione o rosto no enquadramento e capture a imagem.</DialogDescription>
+              </DialogHeader>
+              <div className="overflow-hidden rounded-lg bg-black">
+                <video
+                  ref={(node) => {
+                    videoRef.current = node
+                    attachCameraStream(node)
+                  }}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="aspect-[4/3] max-h-[60vh] w-full object-cover"
+                />
+              </div>
+              <DialogFooter className="sm:justify-end">
+                <Button type="button" variant="outline" onClick={() => setCameraOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="button" onClick={() => void handleCapturePhoto()} disabled={cameraStarting}>
+                  {cameraStarting ? <LoaderCircle className="animate-spin" data-icon="inline-start" /> : <Camera data-icon="inline-start" />}
+                  Capturar
+                </Button>
+              </DialogFooter>
+            </DialogPrimitive.Popup>
+          </DialogPortal>
+        </Dialog>
 
         <Dialog open={photoViewerOpen && Boolean(photoPreview)} onOpenChange={setPhotoViewerOpen}>
           <DialogPortal>
