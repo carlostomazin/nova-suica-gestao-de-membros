@@ -10,13 +10,21 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogDescription, DialogHeader, DialogPortal, DialogTitle } from "@/components/ui/dialog"
 import { MEMBER_STATUS_LABELS, type MemberStatus } from "@/lib/members/types"
 
+const avatarStatusStyles: Record<MemberStatus, string> = {
+  active: "ring-2 ring-emerald-500",
+  inactive: "ring-2 ring-red-500",
+  not_revalidated: "ring-2 ring-amber-500",
+}
+
 export function MemberAvatar({
   name,
   photoUrl,
+  status,
   className,
 }: {
   name: string
   photoUrl: string | null
+  status?: MemberStatus
   className?: string
 }) {
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -28,7 +36,7 @@ export function MemberAvatar({
     .join("")
 
   const avatar = (
-    <Avatar className={className}>
+    <Avatar className={cn(status ? avatarStatusStyles[status] : null, className)}>
       {photoUrl ? <AvatarImage src={photoUrl} alt={`Foto de ${name}`} /> : null}
       <AvatarFallback>{initials || "NS"}</AvatarFallback>
     </Avatar>

@@ -152,7 +152,7 @@ export function MembersPage() {
                     {members.map((member) => (
                       <TableRow key={member.id}>
                         <TableCell className="pl-5">
-                          <MemberAvatar name={member.name} photoUrl={member.photoUrl} className="size-10" />
+                          <MemberAvatar name={member.name} photoUrl={member.photoUrl} status={member.status} className="size-10" />
                         </TableCell>
                         <TableCell className="max-w-0">
                           <span className="block truncate font-medium" title={member.name}>{member.name}</span>
@@ -168,10 +168,9 @@ export function MembersPage() {
               <div className="divide-y sm:hidden">
                 {members.map((member) => (
                   <div key={member.id} className="flex items-center gap-3 px-4 py-3.5">
-                    <MemberAvatar name={member.name} photoUrl={member.photoUrl} className="size-11 shrink-0" />
+                    <MemberAvatar name={member.name} photoUrl={member.photoUrl} status={member.status} className="size-11 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{member.name}</p>
-                      <div className="mt-1.5"><MemberStatusBadge status={member.status} /></div>
                     </div>
                     <MemberRowActions member={member} />
                   </div>
