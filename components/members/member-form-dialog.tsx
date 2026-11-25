@@ -297,6 +297,15 @@ export function MemberFormDialog({ open, member, onOpenChange }: MemberFormDialo
 
   async function handleOpenCamera() {
     if (cameraStarting) return
+    const isComputer =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches
+
+    if (!isComputer) {
+      cameraInputRef.current?.click()
+      return
+    }
+
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       cameraInputRef.current?.click()
       return

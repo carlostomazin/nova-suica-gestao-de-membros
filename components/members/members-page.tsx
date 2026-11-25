@@ -15,6 +15,7 @@ import { MemberFiltersDialog } from "@/components/members/member-filters-dialog"
 import { useMemberActions } from "@/components/layout/member-actions-context"
 import { jsonFetcher, downloadMemberExport, type MembersResponse } from "@/lib/members/api-types"
 import type { MemberPhotoFilter, MemberSortOrder, MemberStatus } from "@/lib/members/types"
+import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -77,28 +78,77 @@ export function MembersPage() {
     setPage(1)
   }
 
+  const indicatorCards = [
+    {
+      key: "total",
+      label: "Total",
+      value: data?.stats?.total,
+      dotClass: "bg-primary",
+      statusValue: "all" as const,
+      selectedClassName: "border-primary/30 bg-primary/10 ring-1 ring-primary/20",
+    },
+    {
+      key: "active",
+      label: "Ativos",
+      value: data?.stats?.active,
+      dotClass: "bg-emerald-500",
+      statusValue: "active" as const,
+      selectedClassName: "border-emerald-200 bg-emerald-50 ring-1 ring-emerald-200",
+    },
+    {
+      key: "inactive",
+      label: "Inativos",
+      value: data?.stats?.inactive,
+      dotClass: "bg-red-500",
+      statusValue: "inactive" as const,
+      selectedClassName: "border-red-200 bg-red-50 ring-1 ring-red-200",
+    },
+    {
+      key: "notRevalidated",
+      label: "Não revalidados",
+      value: data?.stats?.notRevalidated,
+      dotClass: "bg-amber-500",
+      statusValue: "not_revalidated" as const,
+      selectedClassName: "border-amber-200 bg-amber-50 ring-1 ring-amber-200",
+    },
+  ]
+
+  function handleIndicatorSelect(nextStatus: StatusFilterValue) {
+    setStatus((current) => (current === nextStatus && nextStatus !== "all" ? "all" : nextStatus))
+    setPage(1)
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <section aria-label="Indicadores de membros" className="grid grid-cols-4 gap-2 px-2 sm:px-0">
-        {[
-          { key: "total", label: "Total", value: data?.stats?.total, dotClass: "bg-primary" },
-          { key: "active", label: "Ativos", value: data?.stats?.active, dotClass: "bg-emerald-500" },
-          { key: "inactive", label: "Inativos", value: data?.stats?.inactive, dotClass: "bg-red-500" },
-          { key: "notRevalidated", label: "Não revalidados", value: data?.stats?.notRevalidated, dotClass: "bg-amber-500" },
-        ].map((item) => (
-          <div
-            key={item.key}
-            className="flex min-w-0 flex-col gap-1 rounded-lg border border-border/80 bg-card p-2 sm:p-2.5"
-          >
-            <div className="flex items-center gap-1.5">
-              <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${item.dotClass}`} />
-              <span className="truncate text-[11px] leading-tight text-muted-foreground sm:text-xs">{item.label}</span>
-            </div>
-            <span className="text-sm font-semibold tabular-nums text-foreground sm:text-base">
-              {isLoading && !data ? <Skeleton className="inline-block h-4 w-8 align-middle" /> : item.value ?? "—"}
-            </span>
-          </div>
-        ))}
+        {indicatorCards.map((item) => {
+          const selected = status === item.statusValue
+          const showSelectedStyle = selected && item.statusValue !== "all"
+
+          return (
+            <button
+              key={item.key}
+              type="button"
+              aria-pressed={selected}
+              aria-label={`Filtrar por ${item.label.toLowerCase()}`}
+              onClick={() => handleIndicatorSelect(item.statusValue)}
+              className={cn(
+                "flex min-w-0 flex-col gap-1 rounded-lg border p-2 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-2.5",
+                showSelectedStyle
+                  ? item.selectedClassName
+                  : "border-border/80 bg-card hover:border-border hover:bg-muted/40",
+              )}
+            >
+              <div className="flex items-center gap-1.5">
+                <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${item.dotClass}`} />
+                <span className="truncate text-[11px] leading-tight text-muted-foreground sm:text-xs">{item.label}</span>
+              </div>
+              <span className="text-sm font-semibold tabular-nums text-foreground sm:text-base">
+                {isLoading && !data ? <Skeleton className="inline-block h-4 w-8 align-middle" /> : item.value ?? "—"}
+              </span>
+            </button>
+          )
+        })}
       </section>
 
       {error ? (
